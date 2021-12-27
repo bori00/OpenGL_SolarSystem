@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-namespace model {
+namespace model_layer {
 
     class Planet
     {

@@ -9,19 +9,20 @@
 #include "TimedDrawable.h"
 #include "Shader.hpp"
 #include "Model3D.hpp"
+#include "ShaderWithUniformLocs.hpp"
 
-namespace view {
+namespace view_layer {
 	class PlanetView : public TimedDrawable
 	{
 	public:
-		PlanetView(model::Planet planet, std::string object_filename, gps::Shader* shader);
+		PlanetView(model_layer::Planet planet, std::string object_filename, gps::ShaderWithUniformLocs* shader_with_uniform_locs);
 
-		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds, GLint model_loc, GLint normal_matrix_loc);
+		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
 	private:
-		model::Planet planet_;
-		gps::Shader* shader_;
-		gps::Model3D object_;
+		model_layer::Planet planet_;
+		gps::ShaderWithUniformLocs* shader_with_uniform_locs_;
+		gps::Model3D* object_;
 	};
 }
 

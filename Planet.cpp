@@ -1,6 +1,6 @@
 #include "Planet.hpp"
 
-namespace model {
+namespace model_layer {
 
     Planet::Planet(glm::vec3 initial_position, long long rotation_period_seconds) {
         this->initial_position_ = initial_position;
@@ -8,7 +8,7 @@ namespace model {
     }
 
     glm::mat4 Planet::getPlanetSpecificModel(long long current_seconds) {
-        glm::mat4 my_model;
+        glm::mat4 my_model(1.0);
 
         // rotate planet
         float angle = computeAngle(current_seconds); // in radians

@@ -11,18 +11,23 @@
 #include "TimedDrawable.h"
 #include "Shader.hpp"
 #include "Model3D.hpp"
+#include "ShaderWithUniformLocs.hpp"
 
-namespace view {
+namespace view_layer {
 	class SolarSystem : public TimedDrawable
 	{
 	public:
 		SolarSystem();
 
-		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds, GLint model_loc, GLint normal_matrix_loc);
+		void init(gps::ShaderWithUniformLocs* generic_shader_with_locs);
+
+		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
 	private:
 		std::vector<PlanetView> planets_;
-		gps::Shader generic_shader_;
+		gps::ShaderWithUniformLocs* generic_shader_with_locs_;
+
+		static const int NO_SECONDS_IN_HOUR = 3600;
 
 		void initPlanets();
 	};
