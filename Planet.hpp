@@ -15,8 +15,8 @@ namespace model {
         glm::mat4 getPlanetSpecificModel(long long current_seconds);
 
     private:
-        glm::vec3 initial_position;
-        long long rotation_period_seconds;
+        glm::vec3 initial_position_;
+        long long rotation_period_seconds_;
 
         float computeAngle(long long current_seconds);
     };
