@@ -11,6 +11,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Model3D.hpp"
+#include "ShaderWithUniformLocs.hpp"
 
 #include <iostream>
 
@@ -26,14 +27,6 @@ glm::mat3 normalMatrix;
 // light parameters
 glm::vec3 lightDir;
 glm::vec3 lightColor;
-
-// shader uniform locations
-GLint modelLoc;
-GLint viewLoc;
-GLint projectionLoc;
-GLint normalMatrixLoc;
-GLint lightDirLoc;
-GLint lightColorLoc;
 
 // camera
 gps::Camera myCamera(
@@ -67,7 +60,7 @@ glm::vec3 neptunePosition(4495.1, 0, 0);
 GLfloat angle;
 
 // shaders
-gps::Shader myBasicShader;
+gps::ShaderWithUniformLocs myShaderWithLocs;
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -127,37 +120,33 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void processMovement() {
-	if (pressedKeys[GLFW_KEY_W]) {
-		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
-		//update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	}
-
-	if (pressedKeys[GLFW_KEY_S]) {
-		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_W]) {
+        myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
-	if (pressedKeys[GLFW_KEY_A]) {
-		myCamera.move(gps::MOVE_LEFT, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_S]) {
+        myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
-	if (pressedKeys[GLFW_KEY_D]) {
-		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_A]) {
+        myCamera.move(gps::MOVE_LEFT, cameraSpeed);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
+
+    if (pressedKeys[GLFW_KEY_D]) {
+        myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+        //update view matrix
+        view = myCamera.getViewMatrix();
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
     if (pressedKeys[GLFW_KEY_Q]) {
         angle -= 1.0f;
@@ -205,189 +194,150 @@ void initModels() {
 }
 
 void initShaders() {
-	myBasicShader.loadShader(
-        "shaders/basic.vert",
-        "shaders/basic.frag");
+    myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
 }
 
 void initUniforms() {
-	myBasicShader.useShaderProgram();
-
-    // create model matrix
     model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelLoc = glGetUniformLocation(myBasicShader.shaderProgram, "model");
 
-	// get view matrix for current camera
-	view = myCamera.getViewMatrix();
-	viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
-	// send view matrix to shader
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    // get view matrix for current camera
+    view = myCamera.getViewMatrix();
+    myShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
-    normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	normalMatrixLoc = glGetUniformLocation(myBasicShader.shaderProgram, "normalMatrix");
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 
-	// create projection matrix
-	projection = glm::perspective(glm::radians(45.0f),
-                               (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-                               0.1f, 1000000.0f);
-	projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
-	// send projection matrix to shader
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));	
+    // create projection matrix
+    projection = glm::perspective(glm::radians(45.0f),
+        (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
+        0.1f, 1000000.0f);
+    myShaderWithLocs.sendProjectionUniform(projection);
 
-	//set the light direction (direction towards the light)
-	lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
-	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
-	// send light dir to shader
-	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
+    //set the light direction (direction towards the light)
+    lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
+    myShaderWithLocs.sendLightDirUniform(lightDir);
 
-	//set light color
-	lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
-	lightColorLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightColor");
-	// send light color to shader
-	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+    //set light color
+    lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
+    myShaderWithLocs.sendLightColorUniform(lightColor);
 }
 
-void renderMercury(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
+//void renderMercury(gps::Shader shader) {
+//    //send mercury model matrix data to shader
+//    glm::mat4 mercury_model = glm::translate(model, mercuryPosition);
+//    myShaderWithLocs.sendModelUniform(mercury_model);
+//
+//    //send mercury normal matrix data to shader
+//    normalMatrix = glm::mat3(glm::inverseTranspose(view * mercury_model));
+//    myShaderWithLocs.sendNormalMatrixUniform(normalMatrix);
+//
+//    // draw mercury
+//    mercury.Draw(shader);
+//}
+//
+//void renderVenus(gps::Shader shader) {
+//    //send venus model matrix data to shader
+//    glm::mat4 venus_model = glm::translate(model, venusPosition);
+//    myShaderWithLocs.sendModelUniform(mvenus_model);
+//
+//    //send venus normal matrix data to shader
+//    normalMatrix = glm::mat3(glm::inverseTranspose(view * venus_model));
+//    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+//
+//    // draw venus
+//    venus.Draw(shader);
+//}
+//
+//void renderEarth(gps::Shader shader) {
+//    //send venus model matrix data to shader
+//    glm::mat4 earth_model = glm::translate(model, earthPosition);
+//    myShaderWithLocs.sendModelUniform(earth_model);
+//
+//    //send venus normal matrix data to shader
+//    normalMatrix = glm::mat3(glm::inverseTranspose(view * earth_model));
+//    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+//
+//    // draw venus
+//    earth.Draw(shader);
+//}
+//
+//void renderMars(gps::Shader shader) {
+//    //send venus model matrix data to shader
+//    glm::mat4 mars_model = glm::translate(model, marsPosition);
+//    myShaderWithLocs.sendModelUniform(mars_model);
+//
+//    //send venus normal matrix data to shader
+//    normalMatrix = glm::mat3(glm::inverseTranspose(view * mars_model));
+//    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+//
+//    // draw venus
+//    mars.Draw(shader);
+//}
 
-    //send mercury model matrix data to shader
-    glm::mat4 mercury_model = glm::translate(model, mercuryPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(mercury_model));
-
-    //send mercury normal matrix data to shader
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * mercury_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw mercury
-    mercury.Draw(shader);
-}
-
-void renderVenus(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
-    //send venus model matrix data to shader
-    glm::mat4 venus_model = glm::translate(model, venusPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(venus_model));
-
-    //send venus normal matrix data to shader
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * venus_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw venus
-    venus.Draw(shader);
-}
-
-void renderEarth(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
-    //send venus model matrix data to shader
-    glm::mat4 earth_model = glm::translate(model, earthPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(earth_model));
-
-    //send venus normal matrix data to shader
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * earth_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw venus
-    earth.Draw(shader);
-}
-
-void renderMars(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
-    //send venus model matrix data to shader
-    glm::mat4 mars_model = glm::translate(model, marsPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(mars_model));
-
-    //send venus normal matrix data to shader
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * mars_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw venus
-    mars.Draw(shader);
-}
-
-void renderJupiter(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
+void renderJupiter(gps::ShaderWithUniformLocs shaderWithUniformLocs) {
     //send venus model matrix data to shader
     glm::mat4 jupiter_model = glm::translate(model, jupiterPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(jupiter_model));
+    shaderWithUniformLocs.sendModelUniform(jupiter_model);
 
     //send venus normal matrix data to shader
     normalMatrix = glm::mat3(glm::inverseTranspose(view * jupiter_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    shaderWithUniformLocs.sendNormalMatrixUniform(normalMatrix);
 
     // draw venus
-    jupiter.Draw(shader);
+    jupiter.Draw(*shaderWithUniformLocs.getShader());
 }
 
-void renderSaturn(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
+void renderSaturn(gps::ShaderWithUniformLocs shaderWithUniformLocs) {
     //send venus model matrix data to shader
     glm::mat4 saturn_model = glm::translate(model, saturnPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(saturn_model));
+    shaderWithUniformLocs.sendModelUniform(saturn_model);
 
     //send venus normal matrix data to shader
     normalMatrix = glm::mat3(glm::inverseTranspose(view * saturn_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    shaderWithUniformLocs.sendNormalMatrixUniform(normalMatrix);
 
     // draw venus
-    saturn.Draw(shader);
+    saturn.Draw(*shaderWithUniformLocs.getShader());
 }
 
-void renderUranus(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
+void renderUranus(gps::ShaderWithUniformLocs shaderWithUniformLocs) {
     //send venus model matrix data to shader
     glm::mat4 uranus_model = glm::translate(model, uranusPosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(uranus_model));
+    shaderWithUniformLocs.sendModelUniform(uranus_model);
 
     //send venus normal matrix data to shader
     normalMatrix = glm::mat3(glm::inverseTranspose(view * uranus_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    shaderWithUniformLocs.sendNormalMatrixUniform(normalMatrix);
 
     // draw venus
-    uranus.Draw(shader);
+    uranus.Draw(*shaderWithUniformLocs.getShader());
 }
 
-void renderNeptune(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
+void renderNeptune(gps::ShaderWithUniformLocs shaderWithUniformLocs) {
     //send venus model matrix data to shader
     glm::mat4 neptune_model = glm::translate(model, neptunePosition);
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(neptune_model));
+    shaderWithUniformLocs.sendModelUniform(neptune_model);
 
     //send venus normal matrix data to shader
     normalMatrix = glm::mat3(glm::inverseTranspose(view * neptune_model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+    shaderWithUniformLocs.sendNormalMatrixUniform(normalMatrix);
 
     // draw venus
-    neptune.Draw(shader);
+    neptune.Draw(*shaderWithUniformLocs.getShader());
 }
 
 void renderScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // render the planets
-    renderMercury(myBasicShader);
+    /*renderMercury(myBasicShader);
     renderVenus(myBasicShader);
     renderEarth(myBasicShader);
-    renderMars(myBasicShader);
-    renderJupiter(myBasicShader);
-    renderSaturn(myBasicShader);
-    renderUranus(myBasicShader);
-    renderNeptune(myBasicShader);
+    renderMars(myBasicShader);*/
+    renderJupiter(myShaderWithLocs);
+    renderSaturn(myShaderWithLocs);
+    renderUranus(myShaderWithLocs);
+    renderNeptune(myShaderWithLocs);
 }
 
 void cleanup() {

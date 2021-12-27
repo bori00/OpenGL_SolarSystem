@@ -1,15 +1,16 @@
 #include "ShaderWithUniformLocs.hpp"
 
 namespace gps {
-	ShaderWithUniformLocs::ShaderWithUniformLocs(std::string vertex_shader_path, std::string fragment_shader_path) {
+
+	void ShaderWithUniformLocs::init(std::string vertex_shader_path, std::string fragment_shader_path) {
 		shader_.loadShader(
 			vertex_shader_path,
 			fragment_shader_path);
-		initUniforms();
+		this->initUniforms();
 	}
 
-	Shader ShaderWithUniformLocs::getShader() {
-		return shader_;
+	Shader* ShaderWithUniformLocs::getShader() {
+		return &shader_;
 	}
 
 	void ShaderWithUniformLocs::sendModelUniform(glm::mat4 model) {

@@ -1,19 +1,19 @@
+#define GLEW_STATIC
 #ifndef ShaderWithUniformLocs_hpp
 #define ShaderWithUniformLocs_hpp
 
-#include "Shader.hpp"
 #include <string>
-#include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp> //glm extension for accessing the internal data structure of glm types
 #include "glm/glm.hpp"
-#include <glm/gtc/type_ptr.hpp>
+#include "Shader.hpp"
 
 namespace gps {
 	class ShaderWithUniformLocs
 	{
 	public:
-		ShaderWithUniformLocs(std::string vertex_shader_path, std::string fragment_shader_path);
+		void init(std::string vertex_shader_path, std::string fragment_shader_path);
 
-		Shader getShader();
+		Shader* getShader();
 
 		void sendModelUniform(glm::mat4 model);
 

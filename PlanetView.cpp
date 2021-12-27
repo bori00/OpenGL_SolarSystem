@@ -1,6 +1,4 @@
 #include "PlanetView.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
 
 namespace view {
 	PlanetView::PlanetView(model::Planet planet, std::string object_filename, gps::Shader* shader) 
