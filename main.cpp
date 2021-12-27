@@ -37,17 +37,21 @@ GLint lightColorLoc;
 
 // camera
 gps::Camera myCamera(
-    glm::vec3(0.0f, 0.0f, 3.0f),
-    glm::vec3(0.0f, 0.0f, -10.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(10.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraSpeed = 0.1f;
+GLfloat cameraSpeed = 10.0f;
 
 GLboolean pressedKeys[1024];
 
 // models
-gps::Model3D teapot;
 gps::Model3D mercury;
+gps::Model3D venus;
+
+glm::vec3 mercuryPosition(579, 0, 0); // todo: multiply by 100
+glm::vec3 venusPosition(1082, 0, 0);
+
 GLfloat angle;
 
 // shaders
@@ -192,6 +196,7 @@ void initOpenGLState() {
 void initModels() {
     teapot.LoadModel("models/teapot/teapot20segUT.obj");
     mercury.LoadModel("models/mercury/mercury.obj");
+    venus.LoadModel("models/venus/venus.obj");
 }
 
 void initShaders() {
@@ -220,7 +225,7 @@ void initUniforms() {
 	// create projection matrix
 	projection = glm::perspective(glm::radians(45.0f),
                                (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-                               0.1f, 20.0f);
+                               0.1f, 100000000.0f);
 	projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
 	// send projection matrix to shader
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));	
@@ -256,26 +261,40 @@ void renderMercury(gps::Shader shader) {
     // select active shader program
     shader.useShaderProgram();
 
-    //send teapot model matrix data to shader
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    //send mercury model matrix data to shader
+    glm::mat4 mercury_model = glm::translate(model, mercuryPosition);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(mercury_model));
 
-    //send teapot normal matrix data to shader
+    //send mercury normal matrix data to shader
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * mercury_model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
     // draw mercury
     mercury.Draw(shader);
 }
 
+void renderVenus(gps::Shader shader) {
+    // select active shader program
+    shader.useShaderProgram();
+
+    //send venus model matrix data to shader
+    glm::mat4 venus_model = glm::translate(model, venusPosition);
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(venus_model));
+
+    //send venus normal matrix data to shader
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * venus_model));
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+    // draw venus
+    venus.Draw(shader);
+}
+
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//render the scene
-
-	// render the teapot
-	// renderTeapot(myBasicShader);
-
-    // render the planet
+    // render the planets
     renderMercury(myBasicShader);
+    renderVenus(myBasicShader);
 }
 
 void cleanup() {
