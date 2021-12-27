@@ -18,18 +18,23 @@ namespace gps {
         //return the view matrix, using the glm::lookAt() function
         glm::mat4 getViewMatrix();
         //update the camera internal parameters following a camera move event
-        void move(MOVE_DIRECTION direction, float speed);
+        void move(MOVE_DIRECTION direction, float speed = DFEAULT_MOVE_SPEED);
         //update the camera internal parameters following a camera rotate event
         //yaw - camera rotation around the y axis
         //pitch - camera rotation around the x axis
         void rotate(float pitch, float yaw);
+
+        static const float DFEAULT_MOVE_SPEED;
+        static const float DEFAULT_ROTATION_RADIANS;
         
     private:
         glm::vec3 cameraPosition;
-        glm::vec3 cameraTarget;
         glm::vec3 cameraFrontDirection;
         glm::vec3 cameraRightDirection;
         glm::vec3 cameraUpDirection;
+        glm::vec3 worldUpDirection;
+
+        void updateCameraRightUpDirection();
     };
     
 }
