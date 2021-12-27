@@ -11,7 +11,7 @@ namespace view_layer {
 	}
 
 	void PlanetView::render(const glm::mat4* base_model, const glm::mat4* view, long long current_seconds) {
-		glm::mat4 model = planet_.getPlanetSpecificModel(current_seconds) * (*base_model);
+		glm::mat4 model =  (*base_model) * planet_.getPlanetSpecificModel(current_seconds);
 
 		shader_with_uniform_locs_->sendModelUniform(model);
 
