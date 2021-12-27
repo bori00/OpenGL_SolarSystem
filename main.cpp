@@ -47,6 +47,7 @@ GLboolean pressedKeys[1024];
 
 // models
 gps::Model3D teapot;
+gps::Model3D mercury;
 GLfloat angle;
 
 // shaders
@@ -190,6 +191,7 @@ void initOpenGLState() {
 
 void initModels() {
     teapot.LoadModel("models/teapot/teapot20segUT.obj");
+    mercury.LoadModel("models/mercury/mercury.obj");
 }
 
 void initShaders() {
@@ -250,14 +252,30 @@ void renderTeapot(gps::Shader shader) {
     teapot.Draw(shader);
 }
 
+void renderMercury(gps::Shader shader) {
+    // select active shader program
+    shader.useShaderProgram();
+
+    //send teapot model matrix data to shader
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    //send teapot normal matrix data to shader
+    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+    // draw mercury
+    mercury.Draw(shader);
+}
+
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//render the scene
 
 	// render the teapot
-	renderTeapot(myBasicShader);
+	// renderTeapot(myBasicShader);
 
+    // render the planet
+    renderMercury(myBasicShader);
 }
 
 void cleanup() {
