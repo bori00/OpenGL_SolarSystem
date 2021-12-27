@@ -37,8 +37,8 @@ GLint lightColorLoc;
 
 // camera
 gps::Camera myCamera(
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(10.0f, 0.0f, 0.0f),
+    glm::vec3(2000.0f, 0.0f, 2000.0f),
+    glm::vec3(2000.0f, 0.0f, 10.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
 GLfloat cameraSpeed = 10.0f;
@@ -55,14 +55,14 @@ gps::Model3D saturn;
 gps::Model3D uranus;
 gps::Model3D neptune;
 
-glm::vec3 mercuryPosition(579, 0, 0); // todo: multiply by 100
-glm::vec3 venusPosition(1082, 0, 0);
-glm::vec3 earthPosition(1496, 0, 0);
-glm::vec3 marsPosition(2279, 0, 0);
-glm::vec3 jupiterPosition(7786, 0, 0);
-glm::vec3 saturnPosition(14335, 0, 0);
-glm::vec3 uranusPosition(28725, 0, 0);
-glm::vec3 neptunePosition(44951, 0, 0);
+glm::vec3 mercuryPosition(57.9, 0, 0); // todo: multiply by 100
+glm::vec3 venusPosition(108.2, 0, 0);
+glm::vec3 earthPosition(149.6, 0, 0);
+glm::vec3 marsPosition(227.9, 0, 0);
+glm::vec3 jupiterPosition(778.6, 0, 0);
+glm::vec3 saturnPosition(1433.5, 0, 0);
+glm::vec3 uranusPosition(2872.5, 0, 0);
+glm::vec3 neptunePosition(4495.1, 0, 0);
 
 GLfloat angle;
 
@@ -230,7 +230,7 @@ void initUniforms() {
 	// create projection matrix
 	projection = glm::perspective(glm::radians(45.0f),
                                (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-                               0.1f, 100000000.0f);
+                               0.1f, 1000000.0f);
 	projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
 	// send projection matrix to shader
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));	
