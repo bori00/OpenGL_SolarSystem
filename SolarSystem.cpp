@@ -17,14 +17,14 @@ namespace view_layer {
 	}
 
 	void SolarSystem::initPlanets() {
-		glm::vec3 mercuryPosition(57.9, 0, 0); // todo: multiply by 100
-		glm::vec3 venusPosition(108.2, 0, 0);
-		glm::vec3 earthPosition(149.6, 0, 0);
-		glm::vec3 marsPosition(227.9, 0, 0);
-		glm::vec3 jupiterPosition(778.6, 0, 0);
-		glm::vec3 saturnPosition(1433.5, 0, 0);
-		glm::vec3 uranusPosition(2872.5, 0, 0);
-		glm::vec3 neptunePosition(4495.1, 0, 0);
+		glm::vec3 mercuryPosition(57900 / DISTANCES_DIVIDER, 0, 0); // todo: multiply by 100
+		glm::vec3 venusPosition(108200 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 earthPosition(149600 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 marsPosition(227900 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 jupiterPosition(778600 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 saturnPosition(1433500 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 uranusPosition(2872500 / DISTANCES_DIVIDER, 0, 0);
+		glm::vec3 neptunePosition(4495100 / DISTANCES_DIVIDER, 0, 0);
 
 		model_layer::Planet mercury_planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR); //1408 hours
 		model_layer::Planet venus_planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR);

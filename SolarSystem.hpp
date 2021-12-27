@@ -28,6 +28,8 @@ namespace view_layer {
 		gps::ShaderWithUniformLocs* generic_shader_with_locs_;
 
 		static const int NO_SECONDS_IN_HOUR = 3600;
+		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
+		static const int DISTANCES_DIVIDER = 1000; 
 
 		void initPlanets();
 	};
