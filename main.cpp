@@ -35,7 +35,7 @@ gps::Camera myCamera(
     glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraSpeed = 10.0f;
+GLfloat cameraSpeed = 1000.0f;
 
 GLboolean pressedKeys[1024];
 
@@ -43,11 +43,22 @@ GLfloat angle;
 
 // shaders
 gps::ShaderWithUniformLocs myShaderWithLocs;
-
 // solar system
 view_layer::SolarSystem solarSystem;
 
+// timing
+float deltaTimeSeconds = 0;
+double lastTimeStamp = glfwGetTime();
+double currentTimeStamp;
 
+const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600; // 1s in real life corresponds to 3600s=1h in the animation
+// (as a consequence, for example, it will take 24 seconds for the Earth to perform a full rotation)
+
+void updateDelta() {
+    lastTimeStamp = currentTimeStamp;
+    currentTimeStamp = glfwGetTime();
+    deltaTimeSeconds = currentTimeStamp - lastTimeStamp;
+}
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -108,41 +119,41 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void processMovement() {
     if (pressedKeys[GLFW_KEY_W]) {
-        myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
+        myCamera.move(gps::MOVE_FORWARD, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
         myShaderWithLocs.sendViewUniform(view);
     }
 
     if (pressedKeys[GLFW_KEY_S]) {
-        myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
+        myCamera.move(gps::MOVE_BACKWARD, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
         myShaderWithLocs.sendViewUniform(view);
     }
 
     if (pressedKeys[GLFW_KEY_A]) {
-        myCamera.move(gps::MOVE_LEFT, cameraSpeed);
+        myCamera.move(gps::MOVE_LEFT, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
         myShaderWithLocs.sendViewUniform(view);
     }
 
     if (pressedKeys[GLFW_KEY_D]) {
-        myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+        myCamera.move(gps::MOVE_RIGHT, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
         myShaderWithLocs.sendViewUniform(view);
     }
 
     if (pressedKeys[GLFW_KEY_Q]) {
-        angle -= 1.0f;
+        angle -= 1.0f * deltaTimeSeconds;
         // update model matrix
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
     }
 
     if (pressedKeys[GLFW_KEY_E]) {
-        angle += 1.0f;
+        angle += 1.0f * deltaTimeSeconds;
         // update model matrix
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
     }
@@ -205,7 +216,7 @@ void initUniforms() {
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    solarSystem.render(&model, &view, 0);
+    solarSystem.render(&model, &view, currentTimeStamp * 3600);
 }
 
 void cleanup() {
@@ -231,6 +242,7 @@ int main(int argc, const char * argv[]) {
 	glCheckError();
 	// application loop
 	while (!glfwWindowShouldClose(myWindow.getWindow())) {
+        updateDelta();
         processMovement();
 	    renderScene();
 

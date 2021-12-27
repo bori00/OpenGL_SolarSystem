@@ -10,12 +10,12 @@ namespace model_layer {
     glm::mat4 Planet::getPlanetSpecificModel(long long current_seconds) {
         glm::mat4 my_model(1.0);
 
-        // rotate planet
+        // translate planet to its current position: 2nd transformation to be applied
+        my_model = glm::translate(my_model, initial_position_);
+
+        // rotate planet: 1st transformation to be applied
         float angle = computeAngle(current_seconds); // in radians
         my_model = glm::rotate(my_model, angle, glm::vec3(0, 1, 0)); // TODO: change axis...
-
-        // translate planet to its current position
-        my_model = glm::translate(my_model, initial_position_);
 
         return my_model;
     }
