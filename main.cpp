@@ -32,31 +32,12 @@ glm::vec3 lightColor;
 // camera
 gps::Camera myCamera(
     glm::vec3(2000.0f, 0.0f, 2000.0f),
-    glm::vec3(2000.0f, 0.0f, 10.0f),
+    glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
 GLfloat cameraSpeed = 10.0f;
 
 GLboolean pressedKeys[1024];
-
-// models
-gps::Model3D mercury;
-gps::Model3D venus;
-gps::Model3D earth;
-gps::Model3D mars;
-gps::Model3D jupiter;
-gps::Model3D saturn;
-gps::Model3D uranus;
-gps::Model3D neptune;
-
-glm::vec3 mercuryPosition(57.9, 0, 0); // todo: multiply by 100
-glm::vec3 venusPosition(108.2, 0, 0);
-glm::vec3 earthPosition(149.6, 0, 0);
-glm::vec3 marsPosition(227.9, 0, 0);
-glm::vec3 jupiterPosition(778.6, 0, 0);
-glm::vec3 saturnPosition(1433.5, 0, 0);
-glm::vec3 uranusPosition(2872.5, 0, 0);
-glm::vec3 neptunePosition(4495.1, 0, 0);
 
 GLfloat angle;
 
@@ -65,6 +46,8 @@ gps::ShaderWithUniformLocs myShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
+
+
 
 GLenum glCheckError_(const char *file, int line)
 {
