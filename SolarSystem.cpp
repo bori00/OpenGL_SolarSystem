@@ -7,7 +7,7 @@ namespace view_layer {
 
 	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs) {
 		generic_shader_with_locs_ = generic_shader_with_locs;
-		initPlanets();
+		initPlanetsAndMoons();
 		initSun();
 	}
 
@@ -17,7 +17,7 @@ namespace view_layer {
 		}
 	}
 
-	void SolarSystem::initPlanets() {
+	void SolarSystem::initPlanetsAndMoons() {
 		glm::vec3 mercuryPosition(57900 / DISTANCES_DIVIDER, 0, 0); // todo: multiply by 100
 		glm::vec3 venusPosition(108200 / DISTANCES_DIVIDER, 0, 0);
 		glm::vec3 earthPosition(149600 / DISTANCES_DIVIDER, 0, 0);
@@ -54,6 +54,12 @@ namespace view_layer {
 		space_objects_.push_back(saturn_view);
 		space_objects_.push_back(uranus_view);
 		space_objects_.push_back(neptune_view);
+
+		// Moons
+		glm::vec3 earthMoonPosition(384 / DISTANCES_DIVIDER + MOON_DIST_OFFSET, 0, 0);
+		model_layer::Moon* earth_moon = new model_layer::Moon(earthMoonPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 27.322 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), earth_planet);
+		view_layer::SpaceObjectView earth_moon_view(earth_moon, "models/earth_moon/earth_moon.obj", generic_shader_with_locs_);
+		space_objects_.push_back(earth_moon_view);
 	}
 
 	void SolarSystem::initSun() {

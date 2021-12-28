@@ -13,6 +13,7 @@
 #include "Model3D.hpp"
 #include "ShaderWithUniformLocs.hpp"
 #include "Sun.h"
+#include "Moon.h"
 
 namespace view_layer {
 	class SolarSystem : public TimedDrawable
@@ -32,8 +33,9 @@ namespace view_layer {
 		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
 		static const int DISTANCES_DIVIDER = 250; 
 		static const int NO_SECONDS_IN_DAY = NO_SECONDS_IN_HOUR * 24;
+		static const int MOON_DIST_OFFSET = 20;
 
-		void initPlanets();
+		void initPlanetsAndMoons();
 
 		void initSun();
 	};
