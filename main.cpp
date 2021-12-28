@@ -36,7 +36,8 @@ gps::Camera myCamera(
     glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraSpeed = 1000.0f;
+GLfloat cameraMoveSpeed = 1000.0f;
+GLfloat cameraRotationSpeed = 10.0f;
 
 GLboolean pressedKeys[1024];
 
@@ -127,31 +128,19 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void processMovement() {
     if (pressedKeys[GLFW_KEY_W]) {
-        myCamera.move(gps::MOVE_FORWARD, cameraSpeed * deltaTimeSeconds);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myShaderWithLocs.sendViewUniform(view);
+        myCamera.move(gps::MOVE_FORWARD, cameraMoveSpeed * deltaTimeSeconds);
     }
 
     if (pressedKeys[GLFW_KEY_S]) {
-        myCamera.move(gps::MOVE_BACKWARD, cameraSpeed * deltaTimeSeconds);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myShaderWithLocs.sendViewUniform(view);
+        myCamera.move(gps::MOVE_BACKWARD, cameraMoveSpeed * deltaTimeSeconds);
     }
 
     if (pressedKeys[GLFW_KEY_A]) {
-        myCamera.move(gps::MOVE_LEFT, cameraSpeed * deltaTimeSeconds);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myShaderWithLocs.sendViewUniform(view);
+        myCamera.move(gps::MOVE_LEFT, cameraMoveSpeed * deltaTimeSeconds);
     }
 
     if (pressedKeys[GLFW_KEY_D]) {
-        myCamera.move(gps::MOVE_RIGHT, cameraSpeed * deltaTimeSeconds);
-        //update view matrix
-        view = myCamera.getViewMatrix();
-        myShaderWithLocs.sendViewUniform(view);
+        myCamera.move(gps::MOVE_RIGHT, cameraMoveSpeed * deltaTimeSeconds);
     }
 
     if (pressedKeys[GLFW_KEY_Q]) {
@@ -164,6 +153,20 @@ void processMovement() {
         angle += 1.0f * deltaTimeSeconds;
         // update model matrix
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
+    }
+
+    if (pressedKeys[GLFW_KEY_Y]) {
+        myCamera.rotate(0, -cameraRotationSpeed * deltaTimeSeconds);
+    }
+    if (pressedKeys[GLFW_KEY_T]) {
+        myCamera.rotate(0, cameraRotationSpeed * deltaTimeSeconds);
+    }
+
+    if (pressedKeys[GLFW_KEY_P]) {
+        myCamera.rotate(cameraRotationSpeed * deltaTimeSeconds, 0);
+    }
+    if (pressedKeys[GLFW_KEY_L]) {
+        myCamera.rotate(-cameraRotationSpeed * deltaTimeSeconds, 0);
     }
 }
 
@@ -200,8 +203,8 @@ void initShaders() {
 void initSkyBox() {
     skybox_faces.push_back("models/space_skybox/right.png");
     skybox_faces.push_back("models/space_skybox/left.png");
-    skybox_faces.push_back("models/space_skybox/top.png");
     skybox_faces.push_back("models/space_skybox/bot.png");
+    skybox_faces.push_back("models/space_skybox/top.png");
     skybox_faces.push_back("models/space_skybox/back.png");
     skybox_faces.push_back("models/space_skybox/front.png");
     mySkyBox.Load(skybox_faces);
@@ -234,8 +237,16 @@ void initUniforms() {
     myShaderWithLocs.sendLightColorUniform(lightColor);
 }
 
+void updateView() {
+    //update view matrix
+    view = myCamera.getViewMatrix();
+    myShaderWithLocs.sendViewUniform(view);
+}
+
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    updateView();
 
     solarSystem.render(&model, &view, currentTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
 

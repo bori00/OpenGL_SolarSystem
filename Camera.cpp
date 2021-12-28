@@ -39,11 +39,11 @@ namespace gps {
         glm::vec3 prevCameraFrontDirection = cameraFrontDirection;
 
         // pitch
-        glm::mat4 pitch_rotator = glm::rotate(glm::mat4(1.0f), glm::radians(-pitch), glm::vec3(1, 0, 0));
+        glm::mat4 pitch_rotator = glm::rotate(glm::mat4(1.0f), glm::radians(pitch), cameraRightDirection);
         cameraFrontDirection = pitch_rotator * glm::vec4(cameraFrontDirection, 1.0);
 
         // yaw
-        glm::mat4 yaw_rotator = glm::rotate(glm::mat4(1.0f), glm::radians(-yaw), glm::vec3(0, 1, 0));
+        glm::mat4 yaw_rotator = glm::rotate(glm::mat4(1.0f), glm::radians(yaw), cameraUpDirection);
         cameraFrontDirection = yaw_rotator * glm::vec4(cameraFrontDirection, 1.0);
 
         cameraFrontDirection = glm::normalize(cameraFrontDirection);
