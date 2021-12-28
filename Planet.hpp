@@ -16,6 +16,8 @@ namespace model_layer {
 
         glm::mat4 getSpecificModel(long long current_seconds);
 
+        glm::vec3 getCurrentPosition(long long current_seconds);
+
     private:
         glm::vec3 initial_position_;
         long long rotation_period_seconds_;

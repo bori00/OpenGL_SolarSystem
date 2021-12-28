@@ -30,6 +30,16 @@ namespace model_layer {
         return my_model;
     }
 
+    glm::vec3 Planet::getCurrentPosition(long long current_seconds) {
+        glm::mat4 my_model(1.0);
+
+        // rotate planet (on the orbit)
+        float orbit_angle = computeOrbitAngle(current_seconds);
+        my_model = glm::rotate(my_model, orbit_angle, orbit_axis_);
+
+        return glm::vec3(my_model * glm::vec4(initial_position_, 1.0));
+    }
+
     float Planet::computeRotationAngle(long long current_seconds) {
         current_seconds = current_seconds % rotation_period_seconds_;
         float angle = ((float) current_seconds / (float) rotation_period_seconds_) * 2 * glm::pi<float>();;
