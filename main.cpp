@@ -36,8 +36,10 @@ gps::Camera myCamera(
 GLfloat cameraMoveSpeed = 1000.0f;
 GLfloat cameraRotationSpeed = 10.0f;
 
+// event handling
 GLboolean pressedKeys[1024];
 
+// angle of rotation, for the model
 GLfloat angle;
 
 // shaders
@@ -75,7 +77,6 @@ view_layer::PointLight sunLight = {
     /* .diffuse = */ glm::vec3(1.0, 0.952, 0.741),
     /* .specular= */ glm::vec3(1.0, 0.952, 0.741),
 };
-
 
 // speed
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
@@ -124,9 +125,20 @@ GLenum glCheckError_(const char *file, int line)
 }
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
 
+void updateProjection() {
+    projection = glm::perspective(glm::radians(55.0f),
+        (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
+        0.1f, 1000000.0f);
+    fprintf(stdout, "Window resized! New width: %d , and height: %d\n", myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    myShaderWithLocs.sendProjectionUniform(projection);
+    skyboxShaderWithLocs.sendProjectionUniform(projection);
+}
+
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
 	fprintf(stdout, "Window resized! New width: %d , and height: %d\n", width, height);
-	//TODO
+    myWindow.setWindowDimensions({width, height});
+    glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    updateProjection();
 }
 
 void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -201,7 +213,7 @@ void processMovement() {
 }
 
 void initOpenGLWindow() {
-    myWindow.Create(1024, 768, "OpenGL Project Core");
+    myWindow.Create(1024, 768, "Solar System");
 }
 
 void setWindowCallbacks() {
@@ -252,11 +264,7 @@ void initUniforms() {
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 
     // create projection matrix
-    projection = glm::perspective(glm::radians(55.0f),
-        (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-        0.1f, 1000000.0f);
-    myShaderWithLocs.sendProjectionUniform(projection);
-    skyboxShaderWithLocs.sendProjectionUniform(projection);
+    updateProjection();
 
     //set the directional light
     myShaderWithLocs.sendDirectionalLightUniform(dirLight);
