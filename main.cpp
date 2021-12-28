@@ -50,7 +50,10 @@ view_layer::SolarSystem solarSystem;
 // timing
 float deltaTimeSeconds = 0;
 double lastTimeStamp = glfwGetTime();
-double currentTimeStamp;
+double currentTimeStamp = 0;
+double simulationTimeStamp = 0;
+bool stopped = false;
+bool prev_enter_pressed = false;
 
 // skybox
 std::vector<const GLchar*> skybox_faces;
@@ -82,6 +85,9 @@ void updateDelta() {
     lastTimeStamp = currentTimeStamp;
     currentTimeStamp = glfwGetTime();
     deltaTimeSeconds = currentTimeStamp - lastTimeStamp;
+    if (!stopped) {
+        simulationTimeStamp += deltaTimeSeconds;
+    }
 }
 
 GLenum glCheckError_(const char *file, int line)
@@ -183,6 +189,15 @@ void processMovement() {
     if (pressedKeys[GLFW_KEY_L]) {
         myCamera.rotate(-cameraRotationSpeed * deltaTimeSeconds, 0);
     }
+    if (pressedKeys[GLFW_KEY_ENTER]) {
+        if (!prev_enter_pressed) {
+            stopped = !stopped;
+            prev_enter_pressed = true;
+        }
+    }
+    else {
+        prev_enter_pressed = false;
+    }
 }
 
 void initOpenGLWindow() {
@@ -262,7 +277,7 @@ void renderScene() {
 
     updateView();
 
-    solarSystem.render(&model, &view, currentTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+    solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
 
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
 }
