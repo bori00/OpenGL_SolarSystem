@@ -75,7 +75,7 @@ view_layer::PointLight sunLight = {
 
 
 // speed
-const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 2.4 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
+const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
 void updateDelta() {
@@ -237,7 +237,7 @@ void initUniforms() {
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 
     // create projection matrix
-    projection = glm::perspective(glm::radians(45.0f),
+    projection = glm::perspective(glm::radians(55.0f),
         (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
         0.1f, 1000000.0f);
     myShaderWithLocs.sendProjectionUniform(projection);

@@ -8,10 +8,11 @@ namespace view_layer {
 	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs) {
 		generic_shader_with_locs_ = generic_shader_with_locs;
 		initPlanets();
+		initSun();
 	}
 
 	void SolarSystem::render(const glm::mat4* base_model, const glm::mat4* view, long long seconds) {
-		for (auto& planet : planets_) {
+		for (auto& planet : space_objects_) {
 			planet.render(base_model, view, seconds);
 		}
 	}
@@ -45,13 +46,23 @@ namespace view_layer {
 		view_layer::SpaceObjectView uranus_view(uranus_planet, "models/uranus/uranus.obj", generic_shader_with_locs_);
 		view_layer::SpaceObjectView neptune_view(neptune_planet, "models/neptune/neptune.obj", generic_shader_with_locs_);
 
-		planets_.push_back(mercury_view);
-		planets_.push_back(venus_view);
-		planets_.push_back(earth_view);
-		planets_.push_back(mars_view);
-		planets_.push_back(jupiter_view);
-		planets_.push_back(saturn_view);
-		planets_.push_back(uranus_view);
-		planets_.push_back(neptune_view);
+		space_objects_.push_back(mercury_view);
+		space_objects_.push_back(venus_view);
+		space_objects_.push_back(earth_view);
+		space_objects_.push_back(mars_view);
+		space_objects_.push_back(jupiter_view);
+		space_objects_.push_back(saturn_view);
+		space_objects_.push_back(uranus_view);
+		space_objects_.push_back(neptune_view);
+	}
+
+	void SolarSystem::initSun() {
+		glm::vec3 sunPosition(0, 0, 0);
+		// TODO: solve memory leak
+		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+
+		view_layer::SpaceObjectView sun_view(sun, "models/sun/sun.obj", generic_shader_with_locs_);
+
+		space_objects_.push_back(sun_view);
 	}
 }

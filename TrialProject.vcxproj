@@ -150,13 +150,15 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model3D.cpp" />
     <ClCompile Include="Planet.cpp" />
-    <ClCompile Include="PlanetView.cpp" />
+    <ClCompile Include="SpaceObjectView.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderWithUniformLocs.cpp" />
     <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="Sun.cpp" />
     <ClCompile Include="TimedDrawable.cpp" />
+    <ClCompile Include="TimedSpaceObject.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -166,13 +168,15 @@
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Model3D.hpp" />
     <ClInclude Include="Planet.hpp" />
-    <ClInclude Include="PlanetView.hpp" />
+    <ClInclude Include="SpaceObjectView.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="ShaderWithUniformLocs.hpp" />
     <ClInclude Include="SkyBox.hpp" />
     <ClInclude Include="SolarSystem.hpp" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Sun.h" />
     <ClInclude Include="TimedDrawable.h" />
+    <ClInclude Include="TimedSpaceObject.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
