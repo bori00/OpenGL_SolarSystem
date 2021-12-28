@@ -22,48 +22,11 @@ struct DirLight {
 };
 uniform DirLight dirLight;
 
-// Old code
-// uniform vec3 lightDir;
-// uniform vec3 lightColor;
-
-// Old code: components
-//vec3 ambient;
-// float ambientStrength = 0.2f;
-// vec3 diffuse;
-// vec3 specular;
-// float specularStrength = 0.5f;
-
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 
 const int material_shininess = 32;
-
-
-// OLd code
-// void computeDirLight()
-// {
-//     //compute eye space coordinates
-//     vec4 fPosEye = view * model * vec4(fPosition, 1.0f);
-//     vec3 normalEye = normalize(normalMatrix * fNormal);
-
-//     //normalize light direction
-//     vec3 lightDirN = vec3(normalize(view * vec4(lightDir, 0.0f)));
-
-//     //compute view direction (in eye coordinates, the viewer is situated at the origin
-//     vec3 viewDir = normalize(- fPosEye.xyz);
-
-//     //compute ambient light
-//     ambient = ambientStrength * lightColor;
-
-//     //compute diffuse light
-//     diffuse = max(dot(normalEye, lightDirN), 0.0f) * lightColor;
-   
-//     //compute specular light
-//     vec3 reflectDir = reflect(-lightDirN, normalEye);
-//     float specCoeff = pow(max(dot(viewDir, reflectDir), 0.0f), 32);
-//     specular = specularStrength * specCoeff * lightColor;
-// }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
@@ -82,12 +45,6 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
 void main() 
 {
-    // initial code
-    //computeDirLight();
-    //compute final vertex color
-    //vec3 color = min((ambient + diffuse) * texture(diffuseTexture, fTexCoords).rgb + specular * texture(specularTexture, fTexCoords).rgb, 1.0f);
-
-    // new code
     // properties
     //compute eye space coordinates
     vec4 fPosEye = view * model * vec4(fPosition, 1.0f);
