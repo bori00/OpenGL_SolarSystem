@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp> //glm extension for accessing the internal data structure of glm types
 #include "glm/glm.hpp"
 #include "Shader.hpp"
+#include "Lighting.h"
 
 namespace gps {
 	class ShaderWithUniformLocs
@@ -23,9 +24,9 @@ namespace gps {
 
 		void sendNormalMatrixUniform(glm::mat3 normal_matrix);
 
-		void sendLightDirUniform(glm::vec3 light_dir);
+		void sendDirectionalLightUniform(view_layer::DirLight dirLight);
 
-		void sendLightColorUniform(glm::vec3 light_color);
+		void sendPointLightUniform(view_layer::PointLight pointLight, int lightIndex);
 
 	private:
 		Shader shader_;

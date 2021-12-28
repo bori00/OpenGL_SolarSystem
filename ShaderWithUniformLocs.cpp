@@ -33,14 +33,26 @@ namespace gps {
 		glUniformMatrix3fv(normal_matrix_loc_, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 	}
 
-	void ShaderWithUniformLocs::sendLightDirUniform(glm::vec3 light_dir) {
+	void ShaderWithUniformLocs::sendDirectionalLightUniform(view_layer::DirLight dirLight) {
 		shader_.useShaderProgram();
-		glUniform3fv(light_dir_loc_, 1, glm::value_ptr(light_dir));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.direction"), 1, glm::value_ptr(dirLight.direction));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.color"), 1, glm::value_ptr(dirLight.color));
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.ambientStrength"), dirLight.ambientStrength);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.specularStrength"), dirLight.specularStrength);
 	}
 
-	void ShaderWithUniformLocs::sendLightColorUniform(glm::vec3 light_color) {
+	void ShaderWithUniformLocs::sendPointLightUniform(view_layer::PointLight pointLight, int lightIndex) {
 		shader_.useShaderProgram();
-		glUniform3fv(light_color_loc_, 1, glm::value_ptr(light_color));
+		std::string lightIndexString = std::to_string(lightIndex);
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].position").c_str()), 1, glm::value_ptr(pointLight.position));
+
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].constant").c_str()), pointLight.constant);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].linear").c_str()), pointLight.linear);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].quadratic").c_str()), pointLight.quadratic);
+
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].ambient").c_str()), 1, glm::value_ptr(pointLight.ambient));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].diffuse").c_str()), 1, glm::value_ptr(pointLight.diffuse));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].specular").c_str()), 1, glm::value_ptr(pointLight.specular));
 	}
 
 	void ShaderWithUniformLocs::initUniforms() {
@@ -50,7 +62,5 @@ namespace gps {
 		view_loc_ = glGetUniformLocation(shader_.shaderProgram, "view");
 		normal_matrix_loc_ = glGetUniformLocation(shader_.shaderProgram, "normalMatrix");
 		projection_loc_ = glGetUniformLocation(shader_.shaderProgram, "projection");
-		light_dir_loc_ = glGetUniformLocation(shader_.shaderProgram, "lightDir");
-		light_color_loc_ = glGetUniformLocation(shader_.shaderProgram, "lightColor");
 	}
 }
