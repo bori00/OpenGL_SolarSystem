@@ -13,6 +13,7 @@
 #include "Model3D.hpp"
 #include "ShaderWithUniformLocs.hpp"
 #include "SolarSystem.hpp"
+#include "SkyBox.hpp"
 
 #include <iostream>
 
@@ -43,6 +44,8 @@ GLfloat angle;
 
 // shaders
 gps::ShaderWithUniformLocs myShaderWithLocs;
+gps::ShaderWithUniformLocs skyboxShaderWithLocs;
+
 // solar system
 view_layer::SolarSystem solarSystem;
 
@@ -50,6 +53,11 @@ view_layer::SolarSystem solarSystem;
 float deltaTimeSeconds = 0;
 double lastTimeStamp = glfwGetTime();
 double currentTimeStamp;
+
+// skybox
+std::vector<const GLchar*> skybox_faces;
+gps::SkyBox mySkyBox;
+
 
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
@@ -186,6 +194,17 @@ void initModels() {
 
 void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
+    skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
+}
+
+void initSkyBox() {
+    skybox_faces.push_back("models/space_skybox/right.png");
+    skybox_faces.push_back("models/space_skybox/left.png");
+    skybox_faces.push_back("models/space_skybox/top.png");
+    skybox_faces.push_back("models/space_skybox/bot.png");
+    skybox_faces.push_back("models/space_skybox/back.png");
+    skybox_faces.push_back("models/space_skybox/front.png");
+    mySkyBox.Load(skybox_faces);
 }
 
 void initUniforms() {
@@ -194,6 +213,7 @@ void initUniforms() {
     // get view matrix for current camera
     view = myCamera.getViewMatrix();
     myShaderWithLocs.sendViewUniform(view);
+    skyboxShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -203,6 +223,7 @@ void initUniforms() {
         (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
         0.1f, 1000000.0f);
     myShaderWithLocs.sendProjectionUniform(projection);
+    skyboxShaderWithLocs.sendProjectionUniform(projection);
 
     //set the light direction (direction towards the light)
     lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
@@ -217,6 +238,8 @@ void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     solarSystem.render(&model, &view, currentTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+
+    mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
 }
 
 void cleanup() {
@@ -236,6 +259,7 @@ int main(int argc, const char * argv[]) {
     initOpenGLState();
 	initModels();
 	initShaders();
+    initSkyBox();
 	initUniforms();
     setWindowCallbacks();
 
