@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <vector>
-#include "PlanetView.hpp"
+#include "SpaceObjectView.hpp"
 #include "Planet.hpp"
 #include "TimedDrawable.h"
 #include "Shader.hpp"
@@ -24,7 +24,7 @@ namespace view_layer {
 		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
 	private:
-		std::vector<PlanetView> planets_;
+		std::vector<SpaceObjectView> planets_;
 		gps::ShaderWithUniformLocs* generic_shader_with_locs_;
 
 		static const int NO_SECONDS_IN_HOUR = 3600;

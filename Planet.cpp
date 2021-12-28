@@ -13,7 +13,7 @@ namespace model_layer {
                 orbital_period_seconds_(orbital_period_seconds),
                 orbit_axis_(orbit_axis) {}
 
-    glm::mat4 Planet::getPlanetSpecificModel(long long current_seconds) {
+    glm::mat4 Planet::getSpecificModel(long long current_seconds) {
         glm::mat4 my_model(1.0);
 
         // rotate planet (on the orbit): 3rd transformation to be applied
