@@ -62,7 +62,10 @@ gps::SkyBox mySkyBox;
 
 // lighting
 // white directional light
-view_layer::DirLight dirLight = {/*direction*/ glm::vec3(0.0f, 1.0f, 1.0f), /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), /*.ambientStrength =*/ 0.2, /*.specularStrength =*/ 0.5 };
+view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
+                                /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
+                                /*.ambientStrength =*/ 0.2, 
+                                /*.specularStrength =*/ 0.5 };
 
 // speed
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
