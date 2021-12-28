@@ -153,6 +153,7 @@
     <ClCompile Include="PlanetView.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderWithUniformLocs.cpp" />
+    <ClCompile Include="SkyBox.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="TimedDrawable.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="PlanetView.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="ShaderWithUniformLocs.hpp" />
+    <ClInclude Include="SkyBox.hpp" />
     <ClInclude Include="SolarSystem.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TimedDrawable.h" />
@@ -176,6 +178,8 @@
   <ItemGroup>
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
+    <None Include="shaders\skyboxShader.frag" />
+    <None Include="shaders\skyboxShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
