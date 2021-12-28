@@ -33,14 +33,12 @@ namespace gps {
 		glUniformMatrix3fv(normal_matrix_loc_, 1, GL_FALSE, glm::value_ptr(normal_matrix));
 	}
 
-	void ShaderWithUniformLocs::sendLightDirUniform(glm::vec3 light_dir) {
+	void ShaderWithUniformLocs::sendDirectionalLightUniform(view_layer::DirLight dirLight) {
 		shader_.useShaderProgram();
-		glUniform3fv(light_dir_loc_, 1, glm::value_ptr(light_dir));
-	}
-
-	void ShaderWithUniformLocs::sendLightColorUniform(glm::vec3 light_color) {
-		shader_.useShaderProgram();
-		glUniform3fv(light_color_loc_, 1, glm::value_ptr(light_color));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.direction"), 1, glm::value_ptr(dirLight.direction));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.color"), 1, glm::value_ptr(dirLight.color));
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.ambientStrength"), dirLight.ambientStrength);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.specularStrength"), dirLight.specularStrength);
 	}
 
 	void ShaderWithUniformLocs::initUniforms() {
@@ -50,7 +48,5 @@ namespace gps {
 		view_loc_ = glGetUniformLocation(shader_.shaderProgram, "view");
 		normal_matrix_loc_ = glGetUniformLocation(shader_.shaderProgram, "normalMatrix");
 		projection_loc_ = glGetUniformLocation(shader_.shaderProgram, "projection");
-		light_dir_loc_ = glGetUniformLocation(shader_.shaderProgram, "lightDir");
-		light_color_loc_ = glGetUniformLocation(shader_.shaderProgram, "lightColor");
 	}
 }

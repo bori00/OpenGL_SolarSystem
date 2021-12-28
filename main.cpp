@@ -14,6 +14,7 @@
 #include "ShaderWithUniformLocs.hpp"
 #include "SolarSystem.hpp"
 #include "SkyBox.hpp"
+#include "Lighting.h"
 
 #include <iostream>
 
@@ -59,7 +60,11 @@ double currentTimeStamp;
 std::vector<const GLchar*> skybox_faces;
 gps::SkyBox mySkyBox;
 
+// lighting
+// white directional light
+view_layer::DirLight dirLight = {/*direction*/ glm::vec3(0.0f, 1.0f, 1.0f), /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), /*.ambientStrength =*/ 0.2, /*.specularStrength =*/ 0.5 };
 
+// speed
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
@@ -228,13 +233,8 @@ void initUniforms() {
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
 
-    //set the light direction (direction towards the light)
-    lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
-    myShaderWithLocs.sendLightDirUniform(lightDir);
-
-    //set light color
-    lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
-    myShaderWithLocs.sendLightColorUniform(lightColor);
+    //set the directional light
+    myShaderWithLocs.sendDirectionalLightUniform(dirLight);
 }
 
 void updateView() {
