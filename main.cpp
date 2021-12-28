@@ -11,6 +11,8 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Model3D.hpp"
+#include "ShaderWithUniformLocs.hpp"
+#include "SolarSystem.hpp"
 
 #include <iostream>
 
@@ -27,30 +29,36 @@ glm::mat3 normalMatrix;
 glm::vec3 lightDir;
 glm::vec3 lightColor;
 
-// shader uniform locations
-GLint modelLoc;
-GLint viewLoc;
-GLint projectionLoc;
-GLint normalMatrixLoc;
-GLint lightDirLoc;
-GLint lightColorLoc;
-
 // camera
 gps::Camera myCamera(
-    glm::vec3(0.0f, 0.0f, 3.0f),
-    glm::vec3(0.0f, 0.0f, -10.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraSpeed = 0.1f;
+GLfloat cameraSpeed = 1000.0f;
 
 GLboolean pressedKeys[1024];
 
-// models
-gps::Model3D teapot;
 GLfloat angle;
 
 // shaders
-gps::Shader myBasicShader;
+gps::ShaderWithUniformLocs myShaderWithLocs;
+// solar system
+view_layer::SolarSystem solarSystem;
+
+// timing
+float deltaTimeSeconds = 0;
+double lastTimeStamp = glfwGetTime();
+double currentTimeStamp;
+
+const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
+// (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
+
+void updateDelta() {
+    lastTimeStamp = currentTimeStamp;
+    currentTimeStamp = glfwGetTime();
+    deltaTimeSeconds = currentTimeStamp - lastTimeStamp;
+}
 
 GLenum glCheckError_(const char *file, int line)
 {
@@ -110,60 +118,44 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void processMovement() {
-	if (pressedKeys[GLFW_KEY_W]) {
-		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
-		//update view matrix
-        view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
-
-	if (pressedKeys[GLFW_KEY_S]) {
-		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_W]) {
+        myCamera.move(gps::MOVE_FORWARD, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
-	if (pressedKeys[GLFW_KEY_A]) {
-		myCamera.move(gps::MOVE_LEFT, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_S]) {
+        myCamera.move(gps::MOVE_BACKWARD, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
-	if (pressedKeys[GLFW_KEY_D]) {
-		myCamera.move(gps::MOVE_RIGHT, cameraSpeed);
+    if (pressedKeys[GLFW_KEY_A]) {
+        myCamera.move(gps::MOVE_LEFT, cameraSpeed * deltaTimeSeconds);
         //update view matrix
         view = myCamera.getViewMatrix();
-        myBasicShader.useShaderProgram();
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        // compute normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	}
+        myShaderWithLocs.sendViewUniform(view);
+    }
+
+    if (pressedKeys[GLFW_KEY_D]) {
+        myCamera.move(gps::MOVE_RIGHT, cameraSpeed * deltaTimeSeconds);
+        //update view matrix
+        view = myCamera.getViewMatrix();
+        myShaderWithLocs.sendViewUniform(view);
+    }
 
     if (pressedKeys[GLFW_KEY_Q]) {
-        angle -= 1.0f;
-        // update model matrix for teapot
+        angle -= 1.0f * deltaTimeSeconds;
+        // update model matrix
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-        // update normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
     }
 
     if (pressedKeys[GLFW_KEY_E]) {
-        angle += 1.0f;
-        // update model matrix for teapot
+        angle += 1.0f * deltaTimeSeconds;
+        // update model matrix
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-        // update normal matrix for teapot
-        normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
     }
 }
 
@@ -189,75 +181,42 @@ void initOpenGLState() {
 }
 
 void initModels() {
-    teapot.LoadModel("models/teapot/teapot20segUT.obj");
+   solarSystem.init(&myShaderWithLocs);
 }
 
 void initShaders() {
-	myBasicShader.loadShader(
-        "shaders/basic.vert",
-        "shaders/basic.frag");
+    myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
 }
 
 void initUniforms() {
-	myBasicShader.useShaderProgram();
-
-    // create model matrix for teapot
     model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelLoc = glGetUniformLocation(myBasicShader.shaderProgram, "model");
 
-	// get view matrix for current camera
-	view = myCamera.getViewMatrix();
-	viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
-	// send view matrix to shader
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    // get view matrix for current camera
+    view = myCamera.getViewMatrix();
+    myShaderWithLocs.sendViewUniform(view);
 
-    // compute normal matrix for teapot
-    normalMatrix = glm::mat3(glm::inverseTranspose(view*model));
-	normalMatrixLoc = glGetUniformLocation(myBasicShader.shaderProgram, "normalMatrix");
+    // compute normal matrix
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 
-	// create projection matrix
-	projection = glm::perspective(glm::radians(45.0f),
-                               (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-                               0.1f, 20.0f);
-	projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
-	// send projection matrix to shader
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));	
+    // create projection matrix
+    projection = glm::perspective(glm::radians(45.0f),
+        (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
+        0.1f, 1000000.0f);
+    myShaderWithLocs.sendProjectionUniform(projection);
 
-	//set the light direction (direction towards the light)
-	lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
-	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
-	// send light dir to shader
-	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
+    //set the light direction (direction towards the light)
+    lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
+    myShaderWithLocs.sendLightDirUniform(lightDir);
 
-	//set light color
-	lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
-	lightColorLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightColor");
-	// send light color to shader
-	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
-}
-
-void renderTeapot(gps::Shader shader) {
-    // select active shader program
-    shader.useShaderProgram();
-
-    //send teapot model matrix data to shader
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-    //send teapot normal matrix data to shader
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw teapot
-    teapot.Draw(shader);
+    //set light color
+    lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
+    myShaderWithLocs.sendLightColorUniform(lightColor);
 }
 
 void renderScene() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//render the scene
-
-	// render the teapot
-	renderTeapot(myBasicShader);
-
+    solarSystem.render(&model, &view, currentTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
 }
 
 void cleanup() {
@@ -283,6 +242,7 @@ int main(int argc, const char * argv[]) {
 	glCheckError();
 	// application loop
 	while (!glfwWindowShouldClose(myWindow.getWindow())) {
+        updateDelta();
         processMovement();
 	    renderScene();
 
