@@ -3,17 +3,18 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include "TimedSpaceObject.h"
 
 namespace model_layer {
 
-    class Planet
+    class Planet : public TimedSpaceObject
     {
     public:
        
         // the orbit center is considered to be the origin
         Planet(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, long long orbital_period_seconds, glm::vec3 orbit_axis);
 
-        glm::mat4 getPlanetSpecificModel(long long current_seconds);
+        glm::mat4 getSpecificModel(long long current_seconds);
 
     private:
         glm::vec3 initial_position_;
