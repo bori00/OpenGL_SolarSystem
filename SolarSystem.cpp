@@ -26,14 +26,14 @@ namespace view_layer {
 		glm::vec3 uranusPosition(2872500 / DISTANCES_DIVIDER, 0, 0);
 		glm::vec3 neptunePosition(4495100 / DISTANCES_DIVIDER, 0, 0);
 
-		model_layer::Planet mercury_planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR); //1408 hours
-		model_layer::Planet venus_planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet earth_planet(earthPosition, 24 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet mars_planet(marsPosition, 25 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet jupiter_planet(jupiterPosition, 10 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet saturn_planet(saturnPosition, 11 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet uranus_planet(uranusPosition, 17 * NO_SECONDS_IN_HOUR);
-		model_layer::Planet neptune_planet(neptunePosition, 16 * NO_SECONDS_IN_HOUR);
+		model_layer::Planet mercury_planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 88.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet venus_planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 224.7 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet earth_planet(earthPosition, 24 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 365.2 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet mars_planet(marsPosition, 25 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 687.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet jupiter_planet(jupiterPosition, 10 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 4331.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet saturn_planet(saturnPosition, 11 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 10747.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet uranus_planet(uranusPosition, 17 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 30589.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet neptune_planet(neptunePosition, 16 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 59800 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
 
 		view_layer::PlanetView mercury_view(mercury_planet, "models/mercury/mercury.obj", generic_shader_with_locs_);
 		view_layer::PlanetView venus_view(venus_planet, "models/venus/venus.obj", generic_shader_with_locs_);

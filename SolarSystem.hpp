@@ -30,6 +30,7 @@ namespace view_layer {
 		static const int NO_SECONDS_IN_HOUR = 3600;
 		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
 		static const int DISTANCES_DIVIDER = 1000; 
+		static const int NO_SECONDS_IN_DAY = NO_SECONDS_IN_HOUR * 24;
 
 		void initPlanets();
 	};

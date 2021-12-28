@@ -31,7 +31,7 @@ glm::vec3 lightColor;
 
 // camera
 gps::Camera myCamera(
-    glm::vec3(2000.0f, 0.0f, 2000.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
@@ -51,8 +51,8 @@ float deltaTimeSeconds = 0;
 double lastTimeStamp = glfwGetTime();
 double currentTimeStamp;
 
-const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600; // 1s in real life corresponds to 3600s=1h in the animation
-// (as a consequence, for example, it will take 24 seconds for the Earth to perform a full rotation)
+const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
+// (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
 void updateDelta() {
     lastTimeStamp = currentTimeStamp;
@@ -216,7 +216,7 @@ void initUniforms() {
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    solarSystem.render(&model, &view, currentTimeStamp * 3600);
+    solarSystem.render(&model, &view, currentTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
 }
 
 void cleanup() {
