@@ -26,6 +26,8 @@ namespace gps {
 
 		void sendDirectionalLightUniform(view_layer::DirLight dirLight);
 
+		void sendPointLightUniform(view_layer::PointLight pointLight, int lightIndex);
+
 	private:
 		Shader shader_;
 		GLint model_loc_;

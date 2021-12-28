@@ -27,10 +27,6 @@ glm::mat4 view;
 glm::mat4 projection;
 glm::mat3 normalMatrix;
 
-// light parameters
-glm::vec3 lightDir;
-glm::vec3 lightColor;
-
 // camera
 gps::Camera myCamera(
     glm::vec3(0.0f, 0.0f, 0.0f),
@@ -65,10 +61,21 @@ gps::SkyBox mySkyBox;
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
                                 /*.ambientStrength =*/ 0.2, 
-                                /*.specularStrength =*/ 0.5 };
+                                /*.specularStrength =*/ 0.0 };
+// yellow-ish sun light (positional)
+view_layer::PointLight sunLight = {
+    /* .position= */ glm::vec3(0, 0, 0),
+    /* .constant= */ 1.0,
+    /* .linear= */   0.0014,
+    /* .quadratic=*/ 0.0000007,
+    /* .ambient = */ glm::vec3(1.0, 0.952, 0.741),
+    /* .diffuse = */ glm::vec3(1.0, 0.952, 0.741),
+    /* .specular= */ glm::vec3(1.0, 0.952, 0.741),
+};
+
 
 // speed
-const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 36.5; // 1s in real life corresponds to 3600s=1h in the animation
+const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 2.4 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
 void updateDelta() {
@@ -238,11 +245,15 @@ void initUniforms() {
 
     //set the directional light
     myShaderWithLocs.sendDirectionalLightUniform(dirLight);
+
+    // set the sun light
+    myShaderWithLocs.sendPointLightUniform(sunLight, 0);
 }
 
 void updateView() {
     //update view matrix
     view = myCamera.getViewMatrix();
+
     myShaderWithLocs.sendViewUniform(view);
 }
 
