@@ -18,6 +18,7 @@ struct DirLight {
     vec3 color;
 
     float ambientStrength;
+    float diffuseStrength;
     float specularStrength;
 };
 uniform DirLight dirLight;
@@ -52,7 +53,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material_shininess);
     // combine results
     vec3 ambient  = light.color  * vec3(texture(diffuseTexture, fTexCoords)) * light.ambientStrength;
-    vec3 diffuse  = light.color  * diff * vec3(texture(diffuseTexture, fTexCoords));
+    vec3 diffuse  = light.color  * diff * vec3(texture(diffuseTexture, fTexCoords)) * light.diffuseStrength;
     vec3 specular = light.color * spec * vec3(texture(specularTexture, fTexCoords)) * light.specularStrength;
     return (ambient + diffuse + specular);
 }  

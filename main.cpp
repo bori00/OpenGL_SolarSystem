@@ -66,14 +66,16 @@ gps::SkyBox mySkyBox;
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
                                 /*.ambientStrength =*/ 0.2, 
+                                /*.diffuseStrength =*/ 0.0,
                                 /*.specularStrength =*/ 0.0 };
+
 // yellow-ish sun light (positional)
 view_layer::PointLight sunLight = {
     /* .position= */ glm::vec3(0, 0, 0),
     /* .constant= */ 1.0,
     /* .linear= */   0.000014,
     /* .quadratic=*/ 0.000000007,
-    /* .ambient = */ glm::vec3(1.0, 0.952, 0.741),
+    /* .ambient = */ glm::vec3(0.0, 0.0, 0.0),
     /* .diffuse = */ glm::vec3(1.0, 0.952, 0.741),
     /* .specular= */ glm::vec3(1.0, 0.952, 0.741),
 };

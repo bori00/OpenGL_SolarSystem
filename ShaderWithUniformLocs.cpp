@@ -38,6 +38,7 @@ namespace gps {
 		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.direction"), 1, glm::value_ptr(dirLight.direction));
 		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "dirLight.color"), 1, glm::value_ptr(dirLight.color));
 		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.ambientStrength"), dirLight.ambientStrength);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.diffuseStrength"), dirLight.diffuseStrength);
 		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.specularStrength"), dirLight.specularStrength);
 	}
 
