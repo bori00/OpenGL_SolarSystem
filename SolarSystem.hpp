@@ -33,7 +33,9 @@ namespace view_layer {
 		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
 		static const int DISTANCES_DIVIDER = 250; 
 		static const int NO_SECONDS_IN_DAY = NO_SECONDS_IN_HOUR * 24;
-		static const int MOON_DIST_OFFSET = 20;
+		static const int EARTH_MOON_DIST_OFFSET = 20;
+		static const int JUPITER_MOON_DIST_OFFSET = 120;
+		static const int NO_JUPITER_MOONS = 8;
 
 		void initPlanetsAndMoons();
 
