@@ -10,6 +10,7 @@ namespace view_layer {
 		glm::vec3 color;
 
 		float ambientStrength;
+        float diffuseStrength;
 		float specularStrength;
 	};
 
