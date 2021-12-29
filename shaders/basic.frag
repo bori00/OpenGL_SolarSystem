@@ -44,7 +44,7 @@ const int material_shininess = 32;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
-    vec3 lightDir = normalize(-light.direction);
+    vec3 lightDir = vec3(normalize(view * vec4(light.direction, 0.0f)));
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
@@ -88,8 +88,6 @@ void main()
     //compute eye space coordinates
     vec4 fPosEye = view * model * vec4(fPosition, 1.0f);
     vec3 normalEye = normalize(normalMatrix * fNormal);
-    //normalize light direction
-    vec3 lightDirN = vec3(normalize(view * vec4(dirLight.direction, 0.0f)));
     //compute view direction (in eye coordinates, the viewer is situated at the origin
     vec3 viewDir = normalize(- fPosEye.xyz);
 
