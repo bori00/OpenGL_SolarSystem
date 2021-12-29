@@ -17,6 +17,8 @@ namespace view_layer {
 	public:
 		SpaceObjectView(model_layer::TimedSpaceObject* space_object, std::string object_filename, gps::ShaderWithUniformLocs* shader_with_uniform_locs);
 
+		SpaceObjectView(model_layer::TimedSpaceObject* space_object, gps::Model3D* object, gps::ShaderWithUniformLocs* shader_with_uniform_locs);
+
 		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
 	private:
