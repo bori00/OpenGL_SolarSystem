@@ -21,6 +21,10 @@ namespace model_layer {
         return my_model;
     }
 
+    glm::vec3 Sun::getCurrentPosition(long long current_seconds) {
+        return initial_position_;
+    }
+
     float Sun::computeRotationAngle(long long current_seconds) {
         current_seconds = current_seconds % rotation_period_seconds_;
         float angle = ((float)current_seconds / (float)rotation_period_seconds_) * 2 * glm::pi<float>();;

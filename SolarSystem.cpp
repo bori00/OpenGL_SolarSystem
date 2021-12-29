@@ -7,7 +7,7 @@ namespace view_layer {
 
 	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs) {
 		generic_shader_with_locs_ = generic_shader_with_locs;
-		initPlanets();
+		initPlanetsAndMoons();
 		initSun();
 	}
 
@@ -17,7 +17,7 @@ namespace view_layer {
 		}
 	}
 
-	void SolarSystem::initPlanets() {
+	void SolarSystem::initPlanetsAndMoons() {
 		glm::vec3 mercuryPosition(57900 / DISTANCES_DIVIDER, 0, 0); // todo: multiply by 100
 		glm::vec3 venusPosition(108200 / DISTANCES_DIVIDER, 0, 0);
 		glm::vec3 earthPosition(149600 / DISTANCES_DIVIDER, 0, 0);
@@ -54,6 +54,21 @@ namespace view_layer {
 		space_objects_.push_back(saturn_view);
 		space_objects_.push_back(uranus_view);
 		space_objects_.push_back(neptune_view);
+
+		// Moons
+		// 1 moon for the Earth
+		glm::vec3 earthMoonPosition(384 / DISTANCES_DIVIDER + EARTH_MOON_DIST_OFFSET, 0, 0);
+		model_layer::Moon* earth_moon = new model_layer::Moon(earthMoonPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 27.322 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), earth_planet);
+		view_layer::SpaceObjectView earth_moon_view(earth_moon, "models/earth_moon/earth_moon.obj", generic_shader_with_locs_);
+		space_objects_.push_back(earth_moon_view);
+		// 4 moons for Jupiter
+		for (int i = 0; i < NO_JUPITER_MOONS; i++) {
+			double sign = i % 2 == 0 ? -1 : 1;
+			glm::vec3 jupMoonPosition(sign * (JUPITER_MOON_DIST_OFFSET + i * 10), 0, 0);
+			model_layer::Moon* jupiter_moon = new model_layer::Moon(jupMoonPosition, (1.7 + i * 5) * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 2 * (i + 1) * NO_SECONDS_IN_DAY, glm::vec3(glm::sin(i*10+10), glm::cos(i*10+10), glm::sin(i*10+10)), jupiter_planet);
+			view_layer::SpaceObjectView jupiter_moon_view(jupiter_moon, "models/jupiter_io_moon/jupiter_io_moon.obj", generic_shader_with_locs_);
+			space_objects_.push_back(jupiter_moon_view);
+		}
 	}
 
 	void SolarSystem::initSun() {

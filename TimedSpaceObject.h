@@ -10,6 +10,8 @@ namespace model_layer {
 	{
 	public:
 		virtual glm::mat4 getSpecificModel(long long current_seconds) = 0;
+
+		virtual glm::vec3 getCurrentPosition(long long current_seconds) = 0;
 	};
 }
 

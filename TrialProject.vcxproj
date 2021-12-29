@@ -149,6 +149,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model3D.cpp" />
+    <ClCompile Include="Moon.cpp" />
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="SpaceObjectView.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="Lighting.h" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Model3D.hpp" />
+    <ClInclude Include="Moon.h" />
     <ClInclude Include="Planet.hpp" />
     <ClInclude Include="SpaceObjectView.hpp" />
     <ClInclude Include="Shader.hpp" />
