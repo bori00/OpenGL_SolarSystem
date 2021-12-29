@@ -10,6 +10,11 @@ namespace view_layer {
 		this->object_->LoadModel(object_filename);
 	}
 
+	SpaceObjectView::SpaceObjectView(model_layer::TimedSpaceObject* space_object, gps::Model3D* object, gps::ShaderWithUniformLocs* shader_with_uniform_locs) 
+			: space_object_(space_object),
+			  object_(object),
+			  shader_with_uniform_locs_(shader_with_uniform_locs) {}
+
 	void SpaceObjectView::render(const glm::mat4* base_model, const glm::mat4* view, long long current_seconds) {
 		glm::mat4 model =  (*base_model) * space_object_->getSpecificModel(current_seconds);
 
