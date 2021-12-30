@@ -10,6 +10,7 @@
 #include "Model3D.hpp"
 #include "ShaderWithUniformLocs.hpp"
 #include "TimedSpaceObject.h"
+#include "GeometryShader.h"
 
 namespace view_layer {
 	class SpaceObjectView : public TimedDrawable
@@ -20,6 +21,11 @@ namespace view_layer {
 		SpaceObjectView(model_layer::TimedSpaceObject* space_object, gps::Model3D* object, gps::ShaderWithUniformLocs* shader_with_uniform_locs);
 
 		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
+
+		void renderWithDepthMapShader(const glm::mat4* base_model,
+			const glm::mat4* view,
+			long long current_seconds,
+			gps::GeometryShader* geometryShader);
 
 	private:
 		model_layer::TimedSpaceObject* space_object_;

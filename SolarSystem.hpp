@@ -14,6 +14,7 @@
 #include "ShaderWithUniformLocs.hpp"
 #include "Sun.h"
 #include "Moon.h"
+#include "GeometryShader.h"
 
 namespace view_layer {
 	class SolarSystem : public TimedDrawable
@@ -25,16 +26,22 @@ namespace view_layer {
 
 		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
+		void renderWithDepthMapShader(const glm::mat4* base_model,
+			const glm::mat4* view,
+			long long current_seconds,
+			gps::GeometryShader* geometryShader);
+
 	private:
 		std::vector<SpaceObjectView> space_objects_;
+		SpaceObjectView* sun_view_;
 		gps::ShaderWithUniformLocs* generic_shader_with_locs_;
 
 		static const int NO_SECONDS_IN_HOUR = 3600;
 		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
 		static const int DISTANCES_DIVIDER = 250; 
 		static const int NO_SECONDS_IN_DAY = NO_SECONDS_IN_HOUR * 24;
-		static const int EARTH_MOON_DIST_OFFSET = 20;
-		static const int JUPITER_MOON_DIST_OFFSET = 120;
+		static const int EARTH_MOON_DIST_OFFSET = 8;
+		static const int JUPITER_MOON_DIST_OFFSET = 90;
 		static const int NO_JUPITER_MOONS = 8;
 
 		void initPlanetsAndMoons();

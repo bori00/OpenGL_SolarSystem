@@ -12,8 +12,18 @@ namespace view_layer {
 	}
 
 	void SolarSystem::render(const glm::mat4* base_model, const glm::mat4* view, long long seconds) {
+		sun_view_->render(base_model, view, seconds);
 		for (auto& planet : space_objects_) {
 			planet.render(base_model, view, seconds);
+		}
+	}
+
+	void SolarSystem::renderWithDepthMapShader(const glm::mat4* base_model,
+		const glm::mat4* view,
+		long long current_seconds,
+		gps::GeometryShader* geometryShader) {
+		for (auto& planet : space_objects_) {
+			planet.renderWithDepthMapShader(base_model, view, current_seconds, geometryShader);
 		}
 	}
 
@@ -78,8 +88,8 @@ namespace view_layer {
 		// TODO: solve memory leak
 		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
 
-		view_layer::SpaceObjectView sun_view(sun, "models/sun/sun.obj", generic_shader_with_locs_);
+		view_layer::SpaceObjectView* sun_view = new SpaceObjectView(sun, "models/sun/sun.obj", generic_shader_with_locs_);
 
-		space_objects_.push_back(sun_view);
+		sun_view_ = sun_view;
 	}
 }

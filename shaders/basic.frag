@@ -34,14 +34,52 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };  
-#define NR_POINT_LIGHTS 1  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight sunLight;
 
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 
+// for shadows
+uniform samplerCube depthMap;
+uniform float far_plane;
+
 const int material_shininess = 32;
+
+// array of offset direction for sampling
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
+float computePointShadow(vec3 fragPos, vec3  lightPos) {
+	vec3 fragToLight = fragPos - lightPos;
+    
+    float currentDepth = length(fragToLight);
+    // test for shadows
+
+    float shadow = 0.0;
+    float bias = 0.15;
+    int samples = 20;
+    float viewDistance = length(vec3(0, 0, 0) - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth) {
+             shadow += 1.0;
+        }
+    }
+    shadow /= float(samples);
+
+    return shadow;
+}
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
@@ -63,6 +101,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     // important: transform world coordinates of the light to eye space coordinates
     vec3 lightPos = (view * vec4(light.position, 1.0)).xyz; 
 
+    // shadow
+    float shadow = computePointShadow(fragPos, lightPos);
+
     vec3 lightDir = normalize(lightPos - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
@@ -80,7 +121,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + (1.0 - shadow) * diffuse + (1.0 - shadow) * specular);
 } 
 
 void main() 
@@ -95,8 +136,7 @@ void main()
     // phase 1: Directional lighting
     vec3 result = CalcDirLight(dirLight, normalEye, viewDir);
     // phase 2: Point lights
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += CalcPointLight(pointLights[0], normalEye, fPosEye.xyz, viewDir);    
+    result += CalcPointLight(sunLight, normalEye, fPosEye.xyz, viewDir);    
 
     fColor = vec4(result, 1.0f);
 }

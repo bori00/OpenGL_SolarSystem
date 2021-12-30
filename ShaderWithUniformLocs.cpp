@@ -42,18 +42,17 @@ namespace gps {
 		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "dirLight.specularStrength"), dirLight.specularStrength);
 	}
 
-	void ShaderWithUniformLocs::sendPointLightUniform(view_layer::PointLight pointLight, int lightIndex) {
+	void ShaderWithUniformLocs::sendSunLightUniform(view_layer::PointLight pointLight) {
 		shader_.useShaderProgram();
-		std::string lightIndexString = std::to_string(lightIndex);
-		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].position").c_str()), 1, glm::value_ptr(pointLight.position));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "sunLight.position"), 1, glm::value_ptr(pointLight.position));
 
-		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].constant").c_str()), pointLight.constant);
-		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].linear").c_str()), pointLight.linear);
-		glUniform1f(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].quadratic").c_str()), pointLight.quadratic);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "sunLight.constant"), pointLight.constant);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "sunLight.linear"), pointLight.linear);
+		glUniform1f(glGetUniformLocation(shader_.shaderProgram, "sunLight.quadratic"), pointLight.quadratic);
 
-		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].ambient").c_str()), 1, glm::value_ptr(pointLight.ambient));
-		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].diffuse").c_str()), 1, glm::value_ptr(pointLight.diffuse));
-		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, ("pointLights[" + lightIndexString + "].specular").c_str()), 1, glm::value_ptr(pointLight.specular));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "sunLight.ambient"), 1, glm::value_ptr(pointLight.ambient));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "sunLight.diffuse"), 1, glm::value_ptr(pointLight.diffuse));
+		glUniform3fv(glGetUniformLocation(shader_.shaderProgram, "sunLight.specular"), 1, glm::value_ptr(pointLight.specular));
 	}
 
 	void ShaderWithUniformLocs::initUniforms() {
