@@ -44,7 +44,9 @@ uniform sampler2D nightDiffuseTexture;
 
 const int material_shininess = 32;
 
-float sun_diff; //--> used for all lighting types
+vec3 final_texture_color;
+
+float sun_diff_smoothed_factor;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
@@ -56,15 +58,11 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material_shininess);
     // combine results
     vec3 ambient, diffuse, specular;
-    if (sun_diff > 0) {
-        ambient  = light.color  * vec3(texture(diffuseTexture, fTexCoords)) * light.ambientStrength;
-        diffuse  = light.color  * diff * vec3(texture(diffuseTexture, fTexCoords)) * light.diffuseStrength;
-        specular = light.color * spec * vec3(texture(specularTexture, fTexCoords)) * light.specularStrength;
-    } else {
-        ambient  = light.color  * vec3(texture(nightDiffuseTexture, fTexCoords)) * light.ambientStrength;
-        diffuse  = light.color  * diff * vec3(texture(nightDiffuseTexture, fTexCoords)) * light.diffuseStrength;
-        specular = light.color * spec * vec3(texture(nightDiffuseTexture, fTexCoords)) * light.specularStrength;
-    }
+
+    ambient  = light.color  * final_texture_color * light.ambientStrength;
+    diffuse  = light.color  * diff * final_texture_color * light.diffuseStrength;
+    specular = light.color * spec * final_texture_color * light.specularStrength;
+    
     return (ambient + diffuse + specular);
 }  
 
@@ -75,7 +73,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
     vec3 lightDir = normalize(lightPos - fragPos);
     // diffuse shading
-    sun_diff = max(dot(normal, lightDir), 0.0);
+    float sun_diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material_shininess);
@@ -85,20 +83,28 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   			     light.quadratic * (distance * distance));    
     // combine results
     vec3 ambient, diffuse, specular;
-    if (sun_diff > 0) {
-        ambient = light.ambient  * vec3(texture(diffuseTexture, fTexCoords));
-        diffuse = light.diffuse  * sun_diff * vec3(texture(diffuseTexture, fTexCoords));
-        specular = light.specular * spec * vec3(texture(specularTexture, fTexCoords));
-    } else {
-        ambient = light.ambient  * vec3(texture(nightDiffuseTexture, fTexCoords));
-        diffuse  = light.diffuse  * sun_diff * vec3(texture(nightDiffuseTexture, fTexCoords));
-        specular = light.specular * spec * vec3(texture(nightDiffuseTexture, fTexCoords));
-    }
+
+    ambient = light.ambient  * final_texture_color;
+    diffuse = light.diffuse  * sun_diff * final_texture_color;
+    specular = light.specular * spec * final_texture_color;
+   
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
     return (ambient + diffuse + specular);
 } 
+
+void CalcTexture(PointLight sun, vec3 normal, vec3 fragPos) {
+    vec3 lightPos = (view * vec4(sun.position, 1.0)).xyz; 
+
+    vec3 lightDir = normalize(lightPos - fragPos);
+
+    float sun_diff_value = dot(normal, lightDir);
+
+    sun_diff_smoothed_factor = smoothstep(-0.4, 0.4, sun_diff_value);
+
+    final_texture_color = vec3(texture(diffuseTexture, fTexCoords)) * sun_diff_smoothed_factor + vec3(texture(nightDiffuseTexture, fTexCoords)) * (1 - sun_diff_smoothed_factor);
+}
 
 void main() 
 {
@@ -111,6 +117,9 @@ void main()
 
     // phase 1: Point lights
     vec3 result = vec3(0, 0, 0);
+
+    CalcTexture(pointLights[0], normalEye, fPosEye.xyz);
+
 
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
         result += CalcPointLight(pointLights[0], normalEye, fPosEye.xyz, viewDir);    
