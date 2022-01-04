@@ -33,7 +33,7 @@ gps::Camera myCamera(
     glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraMoveSpeed = 1000.0f;
+GLfloat cameraMoveSpeed = 300.0f;
 GLfloat cameraRotationSpeed = 10.0f;
 
 // event handling
@@ -46,6 +46,7 @@ GLfloat angle;
 gps::ShaderWithUniformLocs myShaderWithLocs;
 gps::ShaderWithUniformLocs skyboxShaderWithLocs;
 gps::ShaderWithUniformLocs sunShaderWithLocs;
+gps::ShaderWithUniformLocs earthShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
@@ -66,7 +67,7 @@ gps::SkyBox mySkyBox;
 // white directional light
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
-                                /*.ambientStrength =*/ 0.2, 
+                                /*.ambientStrength =*/ 0.4, 
                                 /*.diffuseStrength =*/ 0.0,
                                 /*.specularStrength =*/ 0.0 };
 
@@ -84,6 +85,9 @@ view_layer::PointLight sunLight = {
 // speed
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
+
+// additional textures
+GLuint earth_night_texture;
 
 void updateDelta() {
     lastTimeStamp = currentTimeStamp;
@@ -136,6 +140,7 @@ void updateProjection() {
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
     sunShaderWithLocs.sendProjectionUniform(projection);
+    earthShaderWithLocs.sendProjectionUniform(projection);
 }
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -237,14 +242,74 @@ void initOpenGLState() {
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
 }
 
+GLuint ReadTextureFromFile(const char* file_name) {
+    int x, y, n;
+    int force_channels = 4;
+    unsigned char* image_data = stbi_load(file_name, &x, &y, &n, force_channels);
+    if (!image_data) {
+        fprintf(stderr, "ERROR: could not load %s\n", file_name);
+        return false;
+    }
+    // NPOT check
+    if ((x & (x - 1)) != 0 || (y & (y - 1)) != 0) {
+        fprintf(
+            stderr, "WARNING: texture %s is not power-of-2 dimensions\n", file_name
+        );
+    }
+
+    int width_in_bytes = x * 4;
+    unsigned char* top = NULL;
+    unsigned char* bottom = NULL;
+    unsigned char temp = 0;
+    int half_height = y / 2;
+
+    for (int row = 0; row < half_height; row++) {
+        top = image_data + row * width_in_bytes;
+        bottom = image_data + (y - row - 1) * width_in_bytes;
+        for (int col = 0; col < width_in_bytes; col++) {
+            temp = *top;
+            *top = *bottom;
+            *bottom = temp;
+            top++;
+            bottom++;
+        }
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_SRGB, //GL_SRGB,//GL_RGBA,
+        x,
+        y,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        image_data
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return textureID;
+}
+
 void initModels() {
-   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs);
+   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs, &earthShaderWithLocs);
+   earth_night_texture = ReadTextureFromFile("models/earth/earth_night_texture.jpg");
 }
 
 void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
     skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
     sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
+    earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
 }
 
 void initSkyBox() {
@@ -265,6 +330,7 @@ void initUniforms() {
     myShaderWithLocs.sendViewUniform(view);
     skyboxShaderWithLocs.sendViewUniform(view);
     sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -274,9 +340,11 @@ void initUniforms() {
 
     //set the directional light
     myShaderWithLocs.sendDirectionalLightUniform(dirLight);
+    earthShaderWithLocs.sendDirectionalLightUniform(dirLight);
 
     // set the sun light
-    myShaderWithLocs.sendPointLightUniform(sunLight, 0);
+    myShaderWithLocs.sendSunLightUniform(sunLight);
+    earthShaderWithLocs.sendSunLightUniform(sunLight);
 }
 
 void updateView() {
@@ -285,6 +353,7 @@ void updateView() {
 
     myShaderWithLocs.sendViewUniform(view);
     sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 }
 
 void renderScene() {
@@ -292,7 +361,14 @@ void renderScene() {
 
     updateView();
 
+    glActiveTexture(GL_TEXTURE5);
+    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
+    glBindTexture(GL_TEXTURE_2D, earth_night_texture);
+
     solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
 }

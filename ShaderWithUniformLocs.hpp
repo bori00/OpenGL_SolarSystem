@@ -26,7 +26,7 @@ namespace gps {
 
 		void sendDirectionalLightUniform(view_layer::DirLight dirLight);
 
-		void sendPointLightUniform(view_layer::PointLight pointLight, int lightIndex);
+		void sendSunLightUniform(view_layer::PointLight sunLight);
 
 	private:
 		Shader shader_;

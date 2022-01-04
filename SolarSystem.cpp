@@ -5,9 +5,10 @@ namespace view_layer {
 		generic_shader_with_locs_ = nullptr;
 	}
 
-	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs, gps::ShaderWithUniformLocs* sun_shader_with_locs) {
+	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs, gps::ShaderWithUniformLocs* sun_shader_with_locs, gps::ShaderWithUniformLocs* earth_shader_with_locs) {
 		generic_shader_with_locs_ = generic_shader_with_locs;
 		sun_shader_with_locs_ = sun_shader_with_locs;
+		earth_shader_with_locs_ = earth_shader_with_locs;
 		initPlanetsAndMoons();
 		initSun();
 	}
@@ -40,7 +41,7 @@ namespace view_layer {
 
 		view_layer::SpaceObjectView mercury_view(mercury_planet, "models/mercury/mercury.obj", generic_shader_with_locs_);
 		view_layer::SpaceObjectView venus_view(venus_planet, "models/venus/venus.obj", generic_shader_with_locs_);
-		view_layer::SpaceObjectView earth_view(earth_planet, "models/earth/earth.obj", generic_shader_with_locs_);
+		view_layer::SpaceObjectView earth_view(earth_planet, "models/earth/earth.obj", earth_shader_with_locs_);
 		view_layer::SpaceObjectView mars_view(mars_planet, "models/mars/mars.obj", generic_shader_with_locs_);
 		view_layer::SpaceObjectView jupiter_view(jupiter_planet, "models/jupiter/jupiter.obj", generic_shader_with_locs_);
 		view_layer::SpaceObjectView saturn_view(saturn_planet, "models/saturn/saturn.obj", generic_shader_with_locs_);
