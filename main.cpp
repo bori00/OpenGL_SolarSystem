@@ -140,6 +140,7 @@ void updateProjection() {
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
     sunShaderWithLocs.sendProjectionUniform(projection);
+    earthShaderWithLocs.sendProjectionUniform(projection);
 }
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -300,7 +301,7 @@ GLuint ReadTextureFromFile(const char* file_name) {
 }
 
 void initModels() {
-   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs);
+   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs, &earthShaderWithLocs);
    earth_night_texture = ReadTextureFromFile("models/earth/earth_night_texture.jpg");
 }
 
@@ -308,6 +309,7 @@ void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
     skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
     sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
+    earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
 }
 
 void initSkyBox() {
@@ -328,6 +330,7 @@ void initUniforms() {
     myShaderWithLocs.sendViewUniform(view);
     skyboxShaderWithLocs.sendViewUniform(view);
     sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -337,9 +340,11 @@ void initUniforms() {
 
     //set the directional light
     myShaderWithLocs.sendDirectionalLightUniform(dirLight);
+    earthShaderWithLocs.sendDirectionalLightUniform(dirLight);
 
     // set the sun light
     myShaderWithLocs.sendPointLightUniform(sunLight, 0);
+    earthShaderWithLocs.sendPointLightUniform(sunLight, 0);
 }
 
 void updateView() {
@@ -348,6 +353,7 @@ void updateView() {
 
     myShaderWithLocs.sendViewUniform(view);
     sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 }
 
 void renderScene() {
@@ -356,9 +362,13 @@ void renderScene() {
     updateView();
 
     glActiveTexture(GL_TEXTURE5);
-    glUniform
+    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
+    glBindTexture(GL_TEXTURE_2D, earth_night_texture);
 
     solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
 }

@@ -40,6 +40,7 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
+uniform sampler2D nightDiffuseTexture;
 
 const int material_shininess = 32;
 
@@ -74,9 +75,16 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float attenuation =  1 / (light.constant + light.linear * distance + 
   			     light.quadratic * (distance * distance));    
     // combine results
-    vec3 ambient  = light.ambient  * vec3(texture(diffuseTexture, fTexCoords));
-    vec3 diffuse  = light.diffuse  * diff * vec3(texture(diffuseTexture, fTexCoords));
-    vec3 specular = light.specular * spec * vec3(texture(specularTexture, fTexCoords));
+    vec3 ambient, diffuse, specular;
+    if (diff >= 0.5) {
+        ambient = light.ambient  * vec3(texture(diffuseTexture, fTexCoords));
+        diffuse = light.diffuse  * diff * vec3(texture(diffuseTexture, fTexCoords));
+        specular = light.specular * spec * vec3(texture(specularTexture, fTexCoords));
+    } else {
+        ambient = light.ambient  * vec3(texture(nightDiffuseTexture, fTexCoords));
+        diffuse  = light.diffuse  * diff * vec3(texture(nightDiffuseTexture, fTexCoords));
+        specular = light.specular * spec * vec3(texture(nightDiffuseTexture, fTexCoords));
+    }
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
