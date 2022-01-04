@@ -95,6 +95,10 @@ const float mouseSensitivity = 0.1f;
 bool mouse_control_enabled = false;
 bool mouse_button_pressed = false;
 
+// wireframe vs solid mode
+bool wireframe_mode_on = false;
+bool wireframe_button_pressed = false;
+
 void updateDelta() {
     lastTimeStamp = currentTimeStamp;
     currentTimeStamp = glfwGetTime();
@@ -241,6 +245,21 @@ void processMovement() {
         }
     } else {
         mouse_button_pressed = false;
+    }
+    if (pressedKeys[GLFW_KEY_Z]) {
+        if (!wireframe_button_pressed) {
+            wireframe_mode_on = !wireframe_mode_on;
+            if (wireframe_mode_on) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+            wireframe_button_pressed = true;
+        }
+    }
+    else {
+        wireframe_button_pressed = false;
     }
 }
 
