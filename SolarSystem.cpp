@@ -5,8 +5,9 @@ namespace view_layer {
 		generic_shader_with_locs_ = nullptr;
 	}
 
-	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs) {
+	void SolarSystem::init(gps::ShaderWithUniformLocs* generic_shader_with_locs, gps::ShaderWithUniformLocs* sun_shader_with_locs) {
 		generic_shader_with_locs_ = generic_shader_with_locs;
+		sun_shader_with_locs_ = sun_shader_with_locs;
 		initPlanetsAndMoons();
 		initSun();
 	}
@@ -78,7 +79,7 @@ namespace view_layer {
 		// TODO: solve memory leak
 		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
 
-		view_layer::SpaceObjectView sun_view(sun, "models/sun/sun.obj", generic_shader_with_locs_);
+		view_layer::SpaceObjectView sun_view(sun, "models/sun/sun.obj", sun_shader_with_locs_);
 
 		space_objects_.push_back(sun_view);
 	}
