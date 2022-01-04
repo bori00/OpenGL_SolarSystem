@@ -187,6 +187,8 @@
     <None Include="shaders\basic.vert" />
     <None Include="shaders\skyboxShader.frag" />
     <None Include="shaders\skyboxShader.vert" />
+    <None Include="shaders\sunShader.frag" />
+    <None Include="shaders\sunShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

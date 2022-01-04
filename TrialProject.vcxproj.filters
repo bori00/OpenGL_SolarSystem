@@ -133,5 +133,11 @@
     <None Include="shaders\skyboxShader.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shaders\sunShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\sunShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

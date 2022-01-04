@@ -45,6 +45,7 @@ GLfloat angle;
 // shaders
 gps::ShaderWithUniformLocs myShaderWithLocs;
 gps::ShaderWithUniformLocs skyboxShaderWithLocs;
+gps::ShaderWithUniformLocs sunShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
@@ -134,6 +135,7 @@ void updateProjection() {
     fprintf(stdout, "Window resized! New width: %d , and height: %d\n", myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
+    sunShaderWithLocs.sendProjectionUniform(projection);
 }
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -236,12 +238,13 @@ void initOpenGLState() {
 }
 
 void initModels() {
-   solarSystem.init(&myShaderWithLocs);
+   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs);
 }
 
 void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
     skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
+    sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
 }
 
 void initSkyBox() {
@@ -261,6 +264,7 @@ void initUniforms() {
     view = myCamera.getViewMatrix();
     myShaderWithLocs.sendViewUniform(view);
     skyboxShaderWithLocs.sendViewUniform(view);
+    sunShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -280,6 +284,7 @@ void updateView() {
     view = myCamera.getViewMatrix();
 
     myShaderWithLocs.sendViewUniform(view);
+    sunShaderWithLocs.sendViewUniform(view);
 }
 
 void renderScene() {

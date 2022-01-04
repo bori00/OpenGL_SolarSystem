@@ -21,13 +21,14 @@ namespace view_layer {
 	public:
 		SolarSystem();
 
-		void init(gps::ShaderWithUniformLocs* generic_shader_with_locs);
+		void init(gps::ShaderWithUniformLocs* generic_shader_with_locs, gps::ShaderWithUniformLocs* sun_shader_with_locs);
 
 		void render(const glm::mat4* base_model, const glm::mat4* view, long long seconds);
 
 	private:
 		std::vector<SpaceObjectView> space_objects_;
 		gps::ShaderWithUniformLocs* generic_shader_with_locs_;
+		gps::ShaderWithUniformLocs* sun_shader_with_locs_;
 
 		static const int NO_SECONDS_IN_HOUR = 3600;
 		// the factor by which the distances between objects are smaller than the size of the objects, compared to the real distance/size ratio
