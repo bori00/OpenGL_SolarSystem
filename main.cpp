@@ -343,8 +343,8 @@ void initUniforms() {
     earthShaderWithLocs.sendDirectionalLightUniform(dirLight);
 
     // set the sun light
-    myShaderWithLocs.sendPointLightUniform(sunLight, 0);
-    earthShaderWithLocs.sendPointLightUniform(sunLight, 0);
+    myShaderWithLocs.sendSunLightUniform(sunLight);
+    earthShaderWithLocs.sendSunLightUniform(sunLight);
 }
 
 void updateView() {

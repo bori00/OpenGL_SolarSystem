@@ -34,8 +34,7 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };  
-#define NR_POINT_LIGHTS 1  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight sunLight;
 
 // textures
 uniform sampler2D diffuseTexture;
@@ -115,17 +114,12 @@ void main()
     //compute view direction (in eye coordinates, the viewer is situated at the origin
     vec3 viewDir = normalize(- fPosEye.xyz);
 
-    // phase 1: Point lights
-    vec3 result = vec3(0, 0, 0);
+    CalcTexture(sunLight, normalEye, fPosEye.xyz);
 
-    CalcTexture(pointLights[0], normalEye, fPosEye.xyz);
-
-
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += CalcPointLight(pointLights[0], normalEye, fPosEye.xyz, viewDir);    
-
-    // phase 2: Directional lighting
-    result += CalcDirLight(dirLight, normalEye, viewDir);
+    // phase 1: Directional lighting
+    vec3 result = CalcDirLight(dirLight, normalEye, viewDir);
+    // phase 2: Point lights
+    result += CalcPointLight(sunLight, normalEye, fPosEye.xyz, viewDir); 
 
     fColor = vec4(result, 1.0f);
 }

@@ -139,5 +139,11 @@
     <None Include="shaders\sunShader.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shaders\earthShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\earthShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
