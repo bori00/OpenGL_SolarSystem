@@ -4,6 +4,8 @@ in vec3 fPosition;
 in vec3 fNormal;
 in vec2 fTexCoords;
 
+in vec3 worldPosition;
+
 out vec4 fColor;
 
 //matrices
@@ -43,6 +45,7 @@ uniform sampler2D specularTexture;
 // for shadows
 uniform samplerCube depthMap;
 uniform float far_plane;
+float shadow = 0.0;
 
 const int material_shininess = 32;
 
@@ -56,29 +59,33 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
-float computePointShadow(vec3 fragPos, vec3  lightPos) {
-	vec3 fragToLight = fragPos - lightPos;
+void computePointShadow() {
+	vec3 fragToLight = fPosition -sunLight.position;
     
     float currentDepth = length(fragToLight);
     // test for shadows
 
     float shadow = 0.0;
-    float bias = 0.15;
-    int samples = 20;
-    float viewDistance = length(vec3(0, 0, 0) - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
-    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+    float bias = 0; //.15;
+    // int samples = 20;
+    // float viewDistance = length(vec3(0, 0, 0) - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
+    // float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
 
-    for(int i = 0; i < samples; ++i)
-    {
-        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-        closestDepth *= far_plane;   // undo mapping [0;1]
-        if(currentDepth - bias > closestDepth) {
-             shadow += 1.0;
-        }
+    // for(int i = 0; i < samples; ++i)
+    // {
+    //     float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+    //     closestDepth *= far_plane;   // undo mapping [0;1]
+    //     if(currentDepth - bias > closestDepth) {
+    //          shadow += 1.0;
+    //     }
+    // }
+    // shadow /= float(samples);
+
+    float closestDepth = texture(depthMap, fragToLight).r;
+    closestDepth *= far_plane;
+    if (currentDepth - bias > closestDepth) {
+        shadow = 1.0;
     }
-    shadow /= float(samples);
-
-    return shadow;
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
@@ -102,7 +109,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     vec3 lightPos = (view * vec4(light.position, 1.0)).xyz; 
 
     // shadow
-    float shadow = computePointShadow(fragPos, lightPos);
+   // float shadow = computePointShadow(fragPos, lightPos);
 
     vec3 lightDir = normalize(lightPos - fragPos);
     // diffuse shading
@@ -136,7 +143,19 @@ void main()
     // phase 1: Directional lighting
     vec3 result = CalcDirLight(dirLight, normalEye, viewDir);
     // phase 2: Point lights
+    computePointShadow();
     result += CalcPointLight(sunLight, normalEye, fPosEye.xyz, viewDir);    
 
     fColor = vec4(result, 1.0f);
+
+    // // debug
+    // vec3 fragToLight = worldPosition - sunLight.position;
+    
+    // float currentDepth = length(fragToLight) / far_plane;
+    // // test for shadows
+
+    // float shadow = 0.0;
+    // float bias = 0; //.15;
+    // float closestDepth = texture(depthMap, fragToLight).r;
+    // fColor = vec4(vec3(closestDepth), 1.0);
 }

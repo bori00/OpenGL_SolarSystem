@@ -365,11 +365,13 @@ void renderScene() {
     glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     myShaderWithLocs.getShader()->useShaderProgram();
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE8);
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-    glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 3);
+    glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
     solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
+    glActiveTexture(GL_TEXTURE8);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void cleanup() {
