@@ -89,6 +89,12 @@ const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real 
 // additional textures
 GLuint earth_night_texture;
 
+// mouse control
+float lastMouseX = 400, lastMouseY = 300;
+const float mouseSensitivity = 0.1f;
+bool mouse_control_enabled = false;
+bool mouse_button_pressed = false;
+
 void updateDelta() {
     lastTimeStamp = currentTimeStamp;
     currentTimeStamp = glfwGetTime();
@@ -165,7 +171,17 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-    //TODO
+    float xoffset = xpos - lastMouseX;
+    float yoffset = ypos - lastMouseY;
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    if (mouse_control_enabled) {
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        myCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
+    }
 }
 
 void processMovement() {
@@ -215,9 +231,16 @@ void processMovement() {
             stopped = !stopped;
             prev_enter_pressed = true;
         }
-    }
-    else {
+    } else {
         prev_enter_pressed = false;
+    }
+    if (pressedKeys[GLFW_KEY_M]) {
+        if (!mouse_button_pressed) {
+            mouse_control_enabled = !mouse_control_enabled;
+            mouse_button_pressed = true;
+        }
+    } else {
+        mouse_button_pressed = false;
     }
 }
 
@@ -240,6 +263,7 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
+    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 GLuint ReadTextureFromFile(const char* file_name) {
