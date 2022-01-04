@@ -33,7 +33,7 @@ gps::Camera myCamera(
     glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
-GLfloat cameraMoveSpeed = 1000.0f;
+GLfloat cameraMoveSpeed = 300.0f;
 GLfloat cameraRotationSpeed = 10.0f;
 
 // event handling
@@ -67,7 +67,7 @@ gps::SkyBox mySkyBox;
 // white directional light
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
-                                /*.ambientStrength =*/ 0.2, 
+                                /*.ambientStrength =*/ 0.4, 
                                 /*.diffuseStrength =*/ 0.0,
                                 /*.specularStrength =*/ 0.0 };
 
