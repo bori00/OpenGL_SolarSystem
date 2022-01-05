@@ -12,6 +12,8 @@ namespace model_layer {
 		virtual glm::mat4 getSpecificModel(long long current_seconds) = 0;
 
 		virtual glm::vec3 getCurrentPosition(long long current_seconds) = 0;
+
+		virtual float getRadius() = 0;
 	};
 }
 

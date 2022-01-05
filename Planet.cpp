@@ -6,12 +6,14 @@ namespace model_layer {
             long long rotation_period_seconds, 
             glm::vec3 rotation_axis, 
             long long orbital_period_seconds, 
-            glm::vec3 orbit_axis) : 
+            glm::vec3 orbit_axis, 
+            float radius) :
                 initial_position_(initial_position),
                 rotation_period_seconds_(rotation_period_seconds),
                 rotation_axis_(rotation_axis),
                 orbital_period_seconds_(orbital_period_seconds),
-                orbit_axis_(orbit_axis) {}
+                orbit_axis_(orbit_axis),
+                radius_(radius) {}
 
     glm::mat4 Planet::getSpecificModel(long long current_seconds) {
         glm::mat4 my_model(1.0);
@@ -50,5 +52,9 @@ namespace model_layer {
         current_seconds = current_seconds % orbital_period_seconds_;
         float angle = ((float)current_seconds / (float)orbital_period_seconds_) * 2 * glm::pi<float>();;
         return angle;
+    }
+
+    float Planet::getRadius() {
+        return radius_;
     }
 }

@@ -11,16 +11,19 @@ namespace model_layer {
     {
     public:
 
-        Sun(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis);
+        Sun(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, float radius);
 
         glm::mat4 getSpecificModel(long long current_seconds);
 
         glm::vec3 getCurrentPosition(long long current_seconds);
 
+        float getRadius();
+
     private:
         glm::vec3 initial_position_;
         long long rotation_period_seconds_;
         glm::vec3 rotation_axis_;
+        float radius_;
 
         float computeRotationAngle(long long current_seconds);
     };

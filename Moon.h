@@ -12,11 +12,13 @@ namespace model_layer {
     public:
 
         // the initial position is taken with respect to the orbit_center
-        Moon(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, long long orbital_period_seconds, glm::vec3 orbit_axis, TimedSpaceObject* orbit_center);
+        Moon(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, long long orbital_period_seconds, glm::vec3 orbit_axis, TimedSpaceObject* orbit_center, float radius);
 
         glm::mat4 getSpecificModel(long long current_seconds);
 
         glm::vec3 getCurrentPosition(long long current_seconds);
+
+        float getRadius();
 
     private:
         glm::vec3 initial_position_;
@@ -25,6 +27,7 @@ namespace model_layer {
         long long orbital_period_seconds_;
         glm::vec3 orbit_axis_;
         model_layer::TimedSpaceObject* orbit_center_;
+        float radius_;
 
         float computeRotationAngle(long long current_seconds);
 

@@ -3,10 +3,12 @@
 namespace model_layer {
     Sun::Sun(glm::vec3 initial_position,
         long long rotation_period_seconds,
-        glm::vec3 rotation_axis) :
+        glm::vec3 rotation_axis, 
+        float radius) :
         initial_position_(initial_position),
         rotation_period_seconds_(rotation_period_seconds),
-        rotation_axis_(rotation_axis) {}
+        rotation_axis_(rotation_axis),
+        radius_(radius) {}
 
     glm::mat4 Sun::getSpecificModel(long long current_seconds) {
         glm::mat4 my_model(1.0);
@@ -29,5 +31,9 @@ namespace model_layer {
         current_seconds = current_seconds % rotation_period_seconds_;
         float angle = ((float)current_seconds / (float)rotation_period_seconds_) * 2 * glm::pi<float>();;
         return angle;
+    }
+
+    float Sun::getRadius() {
+        return radius_;
     }
 }
