@@ -65,7 +65,7 @@ void computePointShadow() {
     float currentDepth = length(fragToLight);
     // test for shadows
 
-    float bias = 10;
+    float bias = 3;
     int samples = 20;
     vec3 viewPos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
     float viewDistance = length(viewPos - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
