@@ -8,8 +8,6 @@ out vec3 fPosition;
 out vec3 fNormal;
 out vec2 fTexCoords;
 
-out vec3 worldPosition;
-
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -20,5 +18,4 @@ void main()
 	fPosition = vPosition;
 	fNormal = vNormal;
 	fTexCoords = vTexCoords;
-	worldPosition = (model * vec4(vPosition, 1.0f)).xyz;
 }

@@ -4,8 +4,6 @@ in vec3 fPosition;
 in vec3 fNormal;
 in vec2 fTexCoords;
 
-in vec3 worldPosition;
-
 out vec4 fColor;
 
 //matrices
@@ -60,31 +58,35 @@ vec3 gridSamplingDisk[20] = vec3[]
 );
 
 void computePointShadow() {
-	vec3 fragToLight = fPosition -sunLight.position;
+    // all coordinates are in world space
+    vec3 fragPos = (model * vec4(fPosition, 1.0)).xyz;
+	vec3 fragToLight = fragPos - sunLight.position;
     
     float currentDepth = length(fragToLight);
     // test for shadows
 
-    float shadow = 0.0;
-    float bias = 0; //.15;
-    // int samples = 20;
-    // float viewDistance = length(vec3(0, 0, 0) - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
-    // float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+    float bias = 0.15;
+    /* int samples = 20;
+    vec3 viewPos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
+    float viewDistance = length(viewPos - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
 
-    // for(int i = 0; i < samples; ++i)
-    // {
-    //     float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-    //     closestDepth *= far_plane;   // undo mapping [0;1]
-    //     if(currentDepth - bias > closestDepth) {
-    //          shadow += 1.0;
-    //     }
-    // }
-    // shadow /= float(samples);
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth) {
+             shadow += 1.0;
+        }
+    }
+    shadow /= float(samples); */
 
-    float closestDepth = texture(depthMap, fragToLight).r;
-    closestDepth *= far_plane;
-    if (currentDepth - bias > closestDepth) {
+    float closestDepth = texture(depthMap, fragToLight).r * far_plane;
+
+    if (closestDepth < currentDepth - bias) {
         shadow = 1.0;
+    } else {
+        shadow = 0.0;
     }
 }
 
@@ -107,9 +109,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
     // important: transform world coordinates of the light to eye space coordinates
     vec3 lightPos = (view * vec4(light.position, 1.0)).xyz; 
-
-    // shadow
-   // float shadow = computePointShadow(fragPos, lightPos);
 
     vec3 lightDir = normalize(lightPos - fragPos);
     // diffuse shading
@@ -148,14 +147,15 @@ void main()
 
     fColor = vec4(result, 1.0f);
 
-    // // debug
-    // vec3 fragToLight = worldPosition - sunLight.position;
+    // debug
+    vec3 worldPosition = (model * vec4(fPosition, 1.0)).xyz;
+    vec3 fragToLight = worldPosition; // - sunLight.position;
     
-    // float currentDepth = length(fragToLight) / far_plane;
-    // // test for shadows
+    float currentDepth = length(fragToLight) / far_plane;
+    // test for shadows
 
-    // float shadow = 0.0;
-    // float bias = 0; //.15;
-    // float closestDepth = texture(depthMap, fragToLight).r;
-    // fColor = vec4(vec3(closestDepth), 1.0);
+    float shadow = 0.0;
+    float bias = 0; //.15;
+    float closestDepth = texture(depthMap, fragToLight).r;
+    fColor = vec4(vec3(closestDepth), 1.0);
 }

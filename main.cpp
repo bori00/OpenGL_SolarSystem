@@ -160,7 +160,7 @@ void updateDelta() {
     currentTimeStamp = glfwGetTime();
     deltaTimeSeconds = currentTimeStamp - lastTimeStamp;
     if (!stopped) {
-        // simulationTimeStamp += deltaTimeSeconds;
+        simulationTimeStamp += deltaTimeSeconds;
     }
 }
 
