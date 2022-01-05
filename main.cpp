@@ -89,7 +89,7 @@ const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real 
 
 // shadows
 unsigned int depthCubemap; // for the sunlight
-const unsigned int SHADOW_WIDTH = 10024, SHADOW_HEIGHT = 10024;
+const unsigned int SHADOW_WIDTH = 10240, SHADOW_HEIGHT = 10240;
 unsigned int depthMapFBO;
 std::vector<glm::mat4> shadowTransforms;
 const float SUN_DEPTH_MAP_FAR_PLANE = 20000;
@@ -452,6 +452,8 @@ void initUniforms() {
     sunDepthMapShader.setVec3("lightPos", sunLight.position);
     glUseProgram(myShaderWithLocs.getShader()->shaderProgram);
     glUniform1f(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
+    glUseProgram(earthShaderWithLocs.getShader()->shaderProgram);
+    glUniform1f(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
 }
 
 void updateView() {
@@ -482,6 +484,8 @@ void renderScene() {
     glActiveTexture(GL_TEXTURE8);
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
     glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+    earthShaderWithLocs.getShader()->useShaderProgram();
+    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
 
     glActiveTexture(GL_TEXTURE5);
     earthShaderWithLocs.getShader()->useShaderProgram();
