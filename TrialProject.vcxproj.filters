@@ -119,6 +119,9 @@
     <ClInclude Include="Moon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeometryShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\basic.frag">

@@ -15,6 +15,7 @@
 #include "SolarSystem.hpp"
 #include "SkyBox.hpp"
 #include "Lighting.h"
+#include "GeometryShader.h"
 
 #include <iostream>
 
@@ -45,12 +46,12 @@ GLfloat angle;
 // shaders
 gps::ShaderWithUniformLocs myShaderWithLocs;
 gps::ShaderWithUniformLocs skyboxShaderWithLocs;
+gps::GeometryShader sunDepthMapShader;
 gps::ShaderWithUniformLocs sunShaderWithLocs;
 gps::ShaderWithUniformLocs earthShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
-
 // timing
 float deltaTimeSeconds = 0;
 double lastTimeStamp = glfwGetTime();
@@ -86,6 +87,13 @@ view_layer::PointLight sunLight = {
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
+// shadows
+unsigned int depthCubemap; // for the sunlight
+const unsigned int SHADOW_WIDTH = 10240, SHADOW_HEIGHT = 10240;
+unsigned int depthMapFBO;
+std::vector<glm::mat4> shadowTransforms;
+const float SUN_DEPTH_MAP_FAR_PLANE = 20000;
+
 // additional textures
 GLuint earth_night_texture;
 
@@ -98,6 +106,53 @@ bool mouse_button_pressed = false;
 // wireframe vs solid mode
 bool wireframe_mode_on = false;
 bool wireframe_button_pressed = false;
+
+void setupShadowTransforms() {
+    float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
+    float near = 1.0f;
+    float far = SUN_DEPTH_MAP_FAR_PLANE;
+    glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, near, far);
+
+    shadowTransforms.clear();
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj *
+        glm::lookAt(sunLight.position, sunLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+}
+
+void setupShadows() {
+    glGenFramebuffers(1, &depthMapFBO);
+
+    // create depth cubemap texture
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT,
+            SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    setupShadowTransforms();
+}
 
 void updateDelta() {
     lastTimeStamp = currentTimeStamp;
@@ -145,8 +200,7 @@ GLenum glCheckError_(const char *file, int line)
 void updateProjection() {
     projection = glm::perspective(glm::radians(55.0f),
         (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-        0.1f, 1000000.0f);
-    fprintf(stdout, "Window resized! New width: %d , and height: %d\n", myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+        0.1f, SUN_DEPTH_MAP_FAR_PLANE);
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
     sunShaderWithLocs.sendProjectionUniform(projection);
@@ -282,7 +336,7 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
-    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // TODO: glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 GLuint ReadTextureFromFile(const char* file_name) {
@@ -351,6 +405,8 @@ void initModels() {
 void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
     skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
+    // the SunDepthMapShader has a gemoetry shader as well
+    sunDepthMapShader.LoadShader("shaders/depthMapForSun.vert", "shaders/depthMapForSun.frag", "shaders/depthMapForSun.geo");
     sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
     earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
 }
@@ -388,6 +444,16 @@ void initUniforms() {
     // set the sun light
     myShaderWithLocs.sendSunLightUniform(sunLight);
     earthShaderWithLocs.sendSunLightUniform(sunLight);
+
+    // for shadows
+    sunDepthMapShader.setFloat("far_plane", SUN_DEPTH_MAP_FAR_PLANE);
+    for (unsigned int i = 0; i < 6; ++i)
+        sunDepthMapShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+    sunDepthMapShader.setVec3("lightPos", sunLight.position);
+    glUseProgram(myShaderWithLocs.getShader()->shaderProgram);
+    glUniform1f(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
+    glUseProgram(earthShaderWithLocs.getShader()->shaderProgram);
+    glUniform1f(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
 }
 
 void updateView() {
@@ -400,11 +466,29 @@ void updateView() {
 }
 
 void renderScene() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    setupShadowTransforms();
 
     updateView();
 
+    // 1. first render to depth cubemap
+    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    solarSystem.renderWithDepthMapShader(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, &sunDepthMapShader);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // 2. then render scene as normal with shadow mapping (using depth cubemap)
+    glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    myShaderWithLocs.getShader()->useShaderProgram();
+    glActiveTexture(GL_TEXTURE8);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+    earthShaderWithLocs.getShader()->useShaderProgram();
+    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+
     glActiveTexture(GL_TEXTURE5);
+    earthShaderWithLocs.getShader()->useShaderProgram();
     glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
     glBindTexture(GL_TEXTURE_2D, earth_night_texture);
 
@@ -414,6 +498,8 @@ void renderScene() {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
+    glActiveTexture(GL_TEXTURE8);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void cleanup() {
@@ -432,9 +518,10 @@ int main(int argc, const char * argv[]) {
 
     initOpenGLState();
 	initModels();
+    setupShadows();
 	initShaders();
     initSkyBox();
-	initUniforms();
+    initUniforms();
     setWindowCallbacks();
 
 	glCheckError();

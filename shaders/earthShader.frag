@@ -47,6 +47,54 @@ vec3 final_texture_color;
 
 float sun_diff_smoothed_factor;
 
+// for shadows
+uniform samplerCube depthMap;
+uniform float far_plane;
+float shadow = 0.0;
+
+// array of offset direction for sampling
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
+void computePointShadow() {
+    // all coordinates are in world space
+    vec3 fragPos = (model * vec4(fPosition, 1.0)).xyz;
+	vec3 fragToLight = fragPos - sunLight.position;
+    
+    float currentDepth = length(fragToLight);
+    // test for shadows
+
+    float bias = 3;
+    int samples = 20;
+    vec3 viewPos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
+    float viewDistance = length(viewPos - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth) {
+             shadow += 1.0;
+        }
+    }
+    shadow /= float(samples);
+
+    /*float closestDepth = texture(depthMap, fragToLight).r * far_plane;
+
+    if (closestDepth < currentDepth - bias) {
+        shadow = 1.0;
+    } else {
+        shadow = 0.0;
+    }*/
+}
+
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = vec3(normalize(view * vec4(light.direction, 0.0f)));
@@ -90,7 +138,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient  *= attenuation;
     diffuse  *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + (1.0 - shadow) * diffuse + (1.0 - shadow) * specular);
 } 
 
 void CalcTexture(PointLight sun, vec3 normal, vec3 fragPos) {
@@ -119,6 +167,7 @@ void main()
     // phase 1: Directional lighting
     vec3 result = CalcDirLight(dirLight, normalEye, viewDir);
     // phase 2: Point lights
+    computePointShadow();
     result += CalcPointLight(sunLight, normalEye, fPosEye.xyz, viewDir); 
 
     fColor = vec4(result, 1.0f);

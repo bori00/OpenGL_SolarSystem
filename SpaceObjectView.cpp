@@ -26,4 +26,15 @@ namespace view_layer {
 
 		object_->Draw(*shader_with_uniform_locs_->getShader());
 	}
+
+	void SpaceObjectView::renderWithDepthMapShader(const glm::mat4* base_model,
+		const glm::mat4* view,
+		long long current_seconds,
+		gps::GeometryShader* geometryShader) {
+		glm::mat4 model = (*base_model) * space_object_->getSpecificModel(current_seconds);
+
+		geometryShader->setMat4("model", model);
+
+		object_->Draw(*geometryShader);
+	}
 }
