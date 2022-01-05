@@ -30,8 +30,8 @@ glm::mat3 normalMatrix;
 
 // camera
 gps::Camera myCamera(
-    glm::vec3(600.0f, 0.0f, 0.0f),
-    glm::vec3(660.0f, 0.0f, 1.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(2000.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
 
 GLfloat cameraMoveSpeed = 300.0f;
@@ -52,7 +52,6 @@ gps::ShaderWithUniformLocs earthShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
-
 // timing
 float deltaTimeSeconds = 0;
 double lastTimeStamp = glfwGetTime();
@@ -90,7 +89,7 @@ const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real 
 
 // shadows
 unsigned int depthCubemap; // for the sunlight
-const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+const unsigned int SHADOW_WIDTH = 10024, SHADOW_HEIGHT = 10024;
 unsigned int depthMapFBO;
 std::vector<glm::mat4> shadowTransforms;
 const float SUN_DEPTH_MAP_FAR_PLANE = 20000;
@@ -337,7 +336,7 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
-    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // TODO: glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 GLuint ReadTextureFromFile(const char* file_name) {

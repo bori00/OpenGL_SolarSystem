@@ -66,7 +66,7 @@ void computePointShadow() {
     // test for shadows
 
     float bias = 10;
-    /* int samples = 20;
+    int samples = 20;
     vec3 viewPos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
     float viewDistance = length(viewPos - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
     float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
@@ -79,15 +79,15 @@ void computePointShadow() {
              shadow += 1.0;
         }
     }
-    shadow /= float(samples); */
+    shadow /= float(samples);
 
-    float closestDepth = texture(depthMap, fragToLight).r * far_plane;
+    /*float closestDepth = texture(depthMap, fragToLight).r * far_plane;
 
     if (closestDepth < currentDepth - bias) {
         shadow = 1.0;
     } else {
         shadow = 0.0;
-    }
+    }*/
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
@@ -157,5 +157,5 @@ void main()
     float shadow = 0.0;
     float bias = 0; //.15;
     float closestDepth = texture(depthMap, fragToLight).r;
-    fColor = vec4(vec3(closestDepth), 1.0); 
+    fColor = vec4(vec3(closestDepth), 1.0); */
 }
