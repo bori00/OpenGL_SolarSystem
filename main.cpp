@@ -47,6 +47,8 @@ GLfloat angle;
 gps::ShaderWithUniformLocs myShaderWithLocs;
 gps::ShaderWithUniformLocs skyboxShaderWithLocs;
 gps::GeometryShader sunDepthMapShader;
+gps::ShaderWithUniformLocs sunShaderWithLocs;
+gps::ShaderWithUniformLocs earthShaderWithLocs;
 
 // solar system
 view_layer::SolarSystem solarSystem;
@@ -67,7 +69,7 @@ gps::SkyBox mySkyBox;
 // white directional light
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
-                                /*.ambientStrength =*/ 0.2, 
+                                /*.ambientStrength =*/ 0.4, 
                                 /*.diffuseStrength =*/ 0.0,
                                 /*.specularStrength =*/ 0.0 };
 
@@ -86,13 +88,25 @@ view_layer::PointLight sunLight = {
 const double REAL_SECOND_TO_ANIMATION_SECONDS = 3600 * 24 * 3.65; // 1s in real life corresponds to 3600s=1h in the animation
 // (as a consequence, for example, it will take 1 seconds for the Earth to perform a full rotation, and 365 seconds to perform an orbital rotation)
 
-
 // shadows
 unsigned int depthCubemap; // for the sunlight
 const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 unsigned int depthMapFBO;
 std::vector<glm::mat4> shadowTransforms;
 const float SUN_DEPTH_MAP_FAR_PLANE = 20000;
+
+// additional textures
+GLuint earth_night_texture;
+
+// mouse control
+float lastMouseX = 400, lastMouseY = 300;
+const float mouseSensitivity = 0.1f;
+bool mouse_control_enabled = false;
+bool mouse_button_pressed = false;
+
+// wireframe vs solid mode
+bool wireframe_mode_on = false;
+bool wireframe_button_pressed = false;
 
 void setupShadowTransforms() {
     float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
@@ -190,6 +204,8 @@ void updateProjection() {
         0.1f, SUN_DEPTH_MAP_FAR_PLANE);
     myShaderWithLocs.sendProjectionUniform(projection);
     skyboxShaderWithLocs.sendProjectionUniform(projection);
+    sunShaderWithLocs.sendProjectionUniform(projection);
+    earthShaderWithLocs.sendProjectionUniform(projection);
 }
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -214,7 +230,17 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-    //TODO
+    float xoffset = xpos - lastMouseX;
+    float yoffset = ypos - lastMouseY;
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    if (mouse_control_enabled) {
+        xoffset *= mouseSensitivity;
+        yoffset *= mouseSensitivity;
+
+        myCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
+    }
 }
 
 void processMovement() {
@@ -264,9 +290,31 @@ void processMovement() {
             stopped = !stopped;
             prev_enter_pressed = true;
         }
+    } else {
+        prev_enter_pressed = false;
+    }
+    if (pressedKeys[GLFW_KEY_M]) {
+        if (!mouse_button_pressed) {
+            mouse_control_enabled = !mouse_control_enabled;
+            mouse_button_pressed = true;
+        }
+    } else {
+        mouse_button_pressed = false;
+    }
+    if (pressedKeys[GLFW_KEY_Z]) {
+        if (!wireframe_button_pressed) {
+            wireframe_mode_on = !wireframe_mode_on;
+            if (wireframe_mode_on) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+            wireframe_button_pressed = true;
+        }
     }
     else {
-        prev_enter_pressed = false;
+        wireframe_button_pressed = false;
     }
 }
 
@@ -289,18 +337,79 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
+    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+GLuint ReadTextureFromFile(const char* file_name) {
+    int x, y, n;
+    int force_channels = 4;
+    unsigned char* image_data = stbi_load(file_name, &x, &y, &n, force_channels);
+    if (!image_data) {
+        fprintf(stderr, "ERROR: could not load %s\n", file_name);
+        return false;
+    }
+    // NPOT check
+    if ((x & (x - 1)) != 0 || (y & (y - 1)) != 0) {
+        fprintf(
+            stderr, "WARNING: texture %s is not power-of-2 dimensions\n", file_name
+        );
+    }
+
+    int width_in_bytes = x * 4;
+    unsigned char* top = NULL;
+    unsigned char* bottom = NULL;
+    unsigned char temp = 0;
+    int half_height = y / 2;
+
+    for (int row = 0; row < half_height; row++) {
+        top = image_data + row * width_in_bytes;
+        bottom = image_data + (y - row - 1) * width_in_bytes;
+        for (int col = 0; col < width_in_bytes; col++) {
+            temp = *top;
+            *top = *bottom;
+            *bottom = temp;
+            top++;
+            bottom++;
+        }
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_SRGB, //GL_SRGB,//GL_RGBA,
+        x,
+        y,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        image_data
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return textureID;
 }
 
 void initModels() {
-   solarSystem.init(&myShaderWithLocs);
+   solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs, &earthShaderWithLocs);
+   earth_night_texture = ReadTextureFromFile("models/earth/earth_night_texture.jpg");
 }
 
 void initShaders() {
     myShaderWithLocs.init("shaders/basic.vert", "shaders/basic.frag");
     skyboxShaderWithLocs.init("shaders/skyboxShader.vert", "shaders/skyboxShader.frag");
-
     // the SunDepthMapShader has a gemoetry shader as well
     sunDepthMapShader.LoadShader("shaders/depthMapForSun.vert", "shaders/depthMapForSun.frag", "shaders/depthMapForSun.geo");
+    sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
+    earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
 }
 
 void initSkyBox() {
@@ -320,6 +429,8 @@ void initUniforms() {
     view = myCamera.getViewMatrix();
     myShaderWithLocs.sendViewUniform(view);
     skyboxShaderWithLocs.sendViewUniform(view);
+    sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 
     // compute normal matrix
     normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
@@ -329,9 +440,11 @@ void initUniforms() {
 
     //set the directional light
     myShaderWithLocs.sendDirectionalLightUniform(dirLight);
+    earthShaderWithLocs.sendDirectionalLightUniform(dirLight);
 
     // set the sun light
     myShaderWithLocs.sendSunLightUniform(sunLight);
+    earthShaderWithLocs.sendSunLightUniform(sunLight);
 
     // for shadows
     sunDepthMapShader.setFloat("far_plane", SUN_DEPTH_MAP_FAR_PLANE);
@@ -347,6 +460,8 @@ void updateView() {
     view = myCamera.getViewMatrix();
 
     myShaderWithLocs.sendViewUniform(view);
+    sunShaderWithLocs.sendViewUniform(view);
+    earthShaderWithLocs.sendViewUniform(view);
 }
 
 void renderScene() {
@@ -368,7 +483,17 @@ void renderScene() {
     glActiveTexture(GL_TEXTURE8);
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
     glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+
+    glActiveTexture(GL_TEXTURE5);
+    earthShaderWithLocs.getShader()->useShaderProgram();
+    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
+    glBindTexture(GL_TEXTURE_2D, earth_night_texture);
+
     solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
     glActiveTexture(GL_TEXTURE8);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
