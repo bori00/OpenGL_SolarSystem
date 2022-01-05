@@ -96,10 +96,13 @@ namespace view_layer {
 	}
 
 	bool SolarSystem::landed_on_planet(long long current_seconds, glm::vec3 current_pos) {
+		int i = 0;
 		for (auto& planet : space_objects_) {
-			if (length(planet.getCurrentPosition(current_seconds) - current_pos) < planet.getRadius()) {
+			if (length(planet.getCurrentPosition(current_seconds) - current_pos) < planet.getRadius() + 10) {
 				return true;
 			}
+			printf("Distance %f\n", length(planet.getCurrentPosition(current_seconds) - current_pos));
+			i++;
 		}
 		return false;
 	}

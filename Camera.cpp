@@ -18,6 +18,12 @@ namespace gps {
         return glm::lookAt(cameraPosition, cameraPosition + cameraFrontDirection, cameraUpDirection);
     }
 
+
+    glm::vec3 Camera::getCameraPosition() {
+        glm::vec3 res = cameraPosition;
+        return res;
+    }
+
     //update the camera internal parameters following a camera move event
     void Camera::move(MOVE_DIRECTION direction, float speed) {
         // TODO: modify cameraTarget

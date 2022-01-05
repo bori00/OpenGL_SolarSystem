@@ -507,6 +507,16 @@ void cleanup() {
     //cleanup code for your own data
 }
 
+void detectLandings() {
+    glm::vec3 cameraPos = myCamera.getCameraPosition();
+
+    bool landed = solarSystem.landed_on_planet(currentTimeStamp, cameraPos);
+
+    if (landed) {
+        printf("Landed on a planet!");
+    }
+}
+
 int main(int argc, const char * argv[]) {
 
     try {
@@ -535,6 +545,8 @@ int main(int argc, const char * argv[]) {
 		glfwSwapBuffers(myWindow.getWindow());
 
 		glCheckError();
+
+        detectLandings();
 	}
 
 	cleanup();
