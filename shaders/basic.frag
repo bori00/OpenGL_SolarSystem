@@ -65,7 +65,7 @@ void computePointShadow() {
     float currentDepth = length(fragToLight);
     // test for shadows
 
-    float bias = 0.15;
+    float bias = 10;
     /* int samples = 20;
     vec3 viewPos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
     float viewDistance = length(viewPos - fragPos); // (0, 0, 0) stands for the viewpos (in eye space)
@@ -148,7 +148,7 @@ void main()
     fColor = vec4(result, 1.0f);
 
     // debug
-    vec3 worldPosition = (model * vec4(fPosition, 1.0)).xyz;
+    /* vec3 worldPosition = (model * vec4(fPosition, 1.0)).xyz;
     vec3 fragToLight = worldPosition; // - sunLight.position;
     
     float currentDepth = length(fragToLight) / far_plane;
@@ -157,5 +157,5 @@ void main()
     float shadow = 0.0;
     float bias = 0; //.15;
     float closestDepth = texture(depthMap, fragToLight).r;
-    fColor = vec4(vec3(closestDepth), 1.0);
+    fColor = vec4(vec3(closestDepth), 1.0); 
 }
