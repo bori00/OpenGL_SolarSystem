@@ -94,4 +94,10 @@ namespace view_layer {
 
 		sun_view_ = sun_view;
 	}
+
+	bool SolarSystem::landed_on_planet(long long current_seconds, glm::vec3 current_pos) {
+		for (auto& planet : space_objects_) {
+			
+		}
+	}
 }
