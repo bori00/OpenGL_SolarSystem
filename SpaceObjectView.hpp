@@ -27,6 +27,10 @@ namespace view_layer {
 			long long current_seconds,
 			gps::GeometryShader* geometryShader);
 
+		glm::vec3 getCurrentPosition(long long current_seconds);
+
+		float getRadius();
+
 	private:
 		model_layer::TimedSpaceObject* space_object_;
 		gps::ShaderWithUniformLocs* shader_with_uniform_locs_;

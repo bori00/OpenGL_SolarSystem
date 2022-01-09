@@ -24,6 +24,8 @@ namespace gps {
         //pitch - camera rotation around the x axis
         void rotate(float pitch, float yaw);
 
+        glm::vec3 getCameraPosition();
+
         static const float DFEAULT_MOVE_SPEED;
         static const float DEFAULT_ROTATION_RADIANS;
         

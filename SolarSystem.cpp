@@ -39,15 +39,14 @@ namespace view_layer {
 		glm::vec3 uranusPosition(2872500 / DISTANCES_DIVIDER, 0, 0);
 		glm::vec3 neptunePosition(4495100 / DISTANCES_DIVIDER, 0, 0);
 
-		// TODO: resolve memory leak
-		model_layer::Planet* mercury_planet = new model_layer::Planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 88 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* venus_planet = new model_layer::Planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 224.7 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* earth_planet = new model_layer::Planet(earthPosition, 24 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 365.2 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* mars_planet = new model_layer::Planet(marsPosition, 25 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 687.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* jupiter_planet = new model_layer::Planet(jupiterPosition, 10 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 4331.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* saturn_planet = new model_layer::Planet(saturnPosition, 11 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 10747.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* uranus_planet = new model_layer::Planet(uranusPosition, 17 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 30589.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
-		model_layer::Planet* neptune_planet = new model_layer::Planet(neptunePosition, 16 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 59800.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+		model_layer::Planet* mercury_planet = new model_layer::Planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 88 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 2.44);
+		model_layer::Planet* venus_planet = new model_layer::Planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 224.7 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 6.052);
+		model_layer::Planet* earth_planet = new model_layer::Planet(earthPosition, 24 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 365.2 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 6.371);
+		model_layer::Planet* mars_planet = new model_layer::Planet(marsPosition, 25 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 687.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 3.390);
+		model_layer::Planet* jupiter_planet = new model_layer::Planet(jupiterPosition, 10 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 4331.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 69.911);
+		model_layer::Planet* saturn_planet = new model_layer::Planet(saturnPosition, 11 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 10747.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 58.232);
+		model_layer::Planet* uranus_planet = new model_layer::Planet(uranusPosition, 17 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 30589.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 25.362);
+		model_layer::Planet* neptune_planet = new model_layer::Planet(neptunePosition, 16 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 59800.0 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 24.622);
 
 		view_layer::SpaceObjectView mercury_view(mercury_planet, "models/mercury/mercury.obj", generic_shader_with_locs_);
 		view_layer::SpaceObjectView venus_view(venus_planet, "models/venus/venus.obj", generic_shader_with_locs_);
@@ -70,16 +69,16 @@ namespace view_layer {
 		// Moons
 		// 1 moon for the Earth
 		glm::vec3 earthMoonPosition(384 / DISTANCES_DIVIDER + EARTH_MOON_DIST_OFFSET, 0, 0);
-		model_layer::Moon* earth_moon = new model_layer::Moon(earthMoonPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 27.322 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), earth_planet);
+		model_layer::Moon* earth_moon = new model_layer::Moon(earthMoonPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 27.322 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), earth_planet, 1.737);
 		view_layer::SpaceObjectView earth_moon_view(earth_moon, "models/earth_moon/earth_moon.obj", generic_shader_with_locs_);
 		space_objects_.push_back(earth_moon_view);
-		// 4 moons for Jupiter (at randomized positions, speed, etc.)
+		// multiple moons for Jupiter (at randomized positions, speed, etc.)
 		gps::Model3D* jupiter_io_moon_model = new gps::Model3D();
 		jupiter_io_moon_model->LoadModel("models/jupiter_io_moon/jupiter_io_moon.obj");
 		for (int i = 0; i < NO_JUPITER_MOONS; i++) {
 			double sign = i % 2 == 0 ? -1 : 1;
 			glm::vec3 jupMoonPosition(sign * (JUPITER_MOON_DIST_OFFSET + i * 10), 0, 0);
-			model_layer::Moon* jupiter_moon = new model_layer::Moon(jupMoonPosition, (1.7 + i * 5) * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 2 * (i + 1) * NO_SECONDS_IN_DAY, glm::vec3(glm::sin(i*10+10), glm::cos(i*10+10), glm::sin(i*10+10)), jupiter_planet);
+			model_layer::Moon* jupiter_moon = new model_layer::Moon(jupMoonPosition, (1.7 + i * 5) * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 2 * (i + 1) * NO_SECONDS_IN_DAY, glm::vec3(glm::sin(i*10+10), glm::cos(i*10+10), glm::sin(i*10+10)), jupiter_planet, 3.643);
 			view_layer::SpaceObjectView jupiter_moon_view(jupiter_moon, jupiter_io_moon_model, generic_shader_with_locs_);
 			space_objects_.push_back(jupiter_moon_view);
 		}
@@ -87,11 +86,23 @@ namespace view_layer {
 
 	void SolarSystem::initSun() {
 		glm::vec3 sunPosition(0, 0, 0);
-		// TODO: solve memory leak
-		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0));
+
+		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 174.085);
 
 		view_layer::SpaceObjectView* sun_view = new SpaceObjectView(sun, "models/sun/sun.obj", sun_shader_with_locs_);
 
 		sun_view_ = sun_view;
+	}
+
+	bool SolarSystem::hasLandedOnPlanet(long long current_seconds, glm::vec3 current_pos) {
+		int i = 0;
+		for (auto& planet : space_objects_) {
+			if (length(planet.getCurrentPosition(current_seconds) - current_pos) < planet.getRadius()) {
+				return true;
+			}
+			// printf("Distance from %d:  %f\n", length(planet.getCurrentPosition(current_seconds) - current_pos), i);
+			i++;
+		}
+		return false;
 	}
 }

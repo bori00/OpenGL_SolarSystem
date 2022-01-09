@@ -37,4 +37,12 @@ namespace view_layer {
 
 		object_->Draw(*geometryShader);
 	}
+
+	glm::vec3 SpaceObjectView::getCurrentPosition(long long current_seconds) {
+		return space_object_->getCurrentPosition(current_seconds);
+	}
+
+	float SpaceObjectView::getRadius() {
+		return space_object_->getRadius();
+	}
 }

@@ -12,11 +12,13 @@ namespace model_layer {
     public:
        
         // the orbit center is considered to be the origin
-        Planet(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, long long orbital_period_seconds, glm::vec3 orbit_axis);
+        Planet(glm::vec3 initial_position, long long rotation_period_seconds, glm::vec3 rotation_axis, long long orbital_period_seconds, glm::vec3 orbit_axis, float radius);
 
         glm::mat4 getSpecificModel(long long current_seconds);
 
         glm::vec3 getCurrentPosition(long long current_seconds);
+
+        float getRadius();
 
     private:
         glm::vec3 initial_position_;
@@ -24,6 +26,7 @@ namespace model_layer {
         glm::vec3 rotation_axis_;
         long long orbital_period_seconds_;
         glm::vec3 orbit_axis_;
+        float radius_;
 
         float computeRotationAngle(long long current_seconds);
 

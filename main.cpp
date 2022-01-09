@@ -35,7 +35,7 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 1.0f, 0.0f));
 
 GLfloat cameraMoveSpeed = 300.0f;
-GLfloat cameraRotationSpeed = 10.0f;
+GLfloat cameraRotationSpeed = 20.0f;
 
 // event handling
 GLboolean pressedKeys[1024];
@@ -106,6 +106,24 @@ bool mouse_button_pressed = false;
 // wireframe vs solid mode
 bool wireframe_mode_on = false;
 bool wireframe_button_pressed = false;
+
+// planet surface scene
+bool surfaceSceneOn = false;
+bool landingDetectionOn = true;
+gps::ShaderWithUniformLocs planetSurfaceShaderWithLocs;
+gps::Camera planetSurfaceCamera(
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(28.0f, 0.0f, 0.0f),
+    glm::vec3(0.0f, 1.0f, 0.0f));
+// white directional light
+view_layer::DirLight planetSurfaceDirLight = {/*direction*/ glm::vec3(-1.0f, 1.0f, 0.0f),
+                                /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f),
+                                /*.ambientStrength =*/ 0.6,
+                                /*.diffuseStrength =*/ 0.8,
+                                /*.specularStrength =*/ 1.0 };
+gps::Model3D planetSurfaceObj;
+gps::Model3D roverObj;
+glm::mat4 planetSurfaceModel(1.0);
 
 void setupShadowTransforms() {
     float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
@@ -205,6 +223,7 @@ void updateProjection() {
     skyboxShaderWithLocs.sendProjectionUniform(projection);
     sunShaderWithLocs.sendProjectionUniform(projection);
     earthShaderWithLocs.sendProjectionUniform(projection);
+    planetSurfaceShaderWithLocs.sendProjectionUniform(projection);
 }
 
 void windowResizeCallback(GLFWwindow* window, int width, int height) {
@@ -234,86 +253,111 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    if (mouse_control_enabled) {
-        xoffset *= mouseSensitivity;
-        yoffset *= mouseSensitivity;
+    if (!surfaceSceneOn) {
+        if (mouse_control_enabled) {
+            xoffset *= mouseSensitivity;
+            yoffset *= mouseSensitivity;
 
-        myCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
+            myCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
+        }
     }
 }
 
 void processMovement() {
-    if (pressedKeys[GLFW_KEY_W]) {
-        myCamera.move(gps::MOVE_FORWARD, cameraMoveSpeed * deltaTimeSeconds);
-    }
-
-    if (pressedKeys[GLFW_KEY_S]) {
-        myCamera.move(gps::MOVE_BACKWARD, cameraMoveSpeed * deltaTimeSeconds);
-    }
-
-    if (pressedKeys[GLFW_KEY_A]) {
-        myCamera.move(gps::MOVE_LEFT, cameraMoveSpeed * deltaTimeSeconds);
-    }
-
-    if (pressedKeys[GLFW_KEY_D]) {
-        myCamera.move(gps::MOVE_RIGHT, cameraMoveSpeed * deltaTimeSeconds);
-    }
-
-    if (pressedKeys[GLFW_KEY_Q]) {
-        angle -= 1.0f * deltaTimeSeconds;
-        // update model matrix
-        model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-    }
-
-    if (pressedKeys[GLFW_KEY_E]) {
-        angle += 1.0f * deltaTimeSeconds;
-        // update model matrix
-        model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
-    }
-
-    if (pressedKeys[GLFW_KEY_Y]) {
-        myCamera.rotate(0, -cameraRotationSpeed * deltaTimeSeconds);
-    }
-    if (pressedKeys[GLFW_KEY_T]) {
-        myCamera.rotate(0, cameraRotationSpeed * deltaTimeSeconds);
-    }
-
-    if (pressedKeys[GLFW_KEY_P]) {
-        myCamera.rotate(cameraRotationSpeed * deltaTimeSeconds, 0);
-    }
-    if (pressedKeys[GLFW_KEY_L]) {
-        myCamera.rotate(-cameraRotationSpeed * deltaTimeSeconds, 0);
-    }
-    if (pressedKeys[GLFW_KEY_ENTER]) {
-        if (!prev_enter_pressed) {
-            stopped = !stopped;
-            prev_enter_pressed = true;
+    if (!surfaceSceneOn) {
+        if (pressedKeys[GLFW_KEY_W]) {
+            myCamera.move(gps::MOVE_FORWARD, cameraMoveSpeed * deltaTimeSeconds);
         }
-    } else {
-        prev_enter_pressed = false;
-    }
-    if (pressedKeys[GLFW_KEY_M]) {
-        if (!mouse_button_pressed) {
-            mouse_control_enabled = !mouse_control_enabled;
-            mouse_button_pressed = true;
+
+        if (pressedKeys[GLFW_KEY_S]) {
+            myCamera.move(gps::MOVE_BACKWARD, cameraMoveSpeed * deltaTimeSeconds);
         }
-    } else {
-        mouse_button_pressed = false;
-    }
-    if (pressedKeys[GLFW_KEY_Z]) {
-        if (!wireframe_button_pressed) {
-            wireframe_mode_on = !wireframe_mode_on;
-            if (wireframe_mode_on) {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        if (pressedKeys[GLFW_KEY_A]) {
+            myCamera.move(gps::MOVE_LEFT, cameraMoveSpeed * deltaTimeSeconds);
+        }
+
+        if (pressedKeys[GLFW_KEY_D]) {
+            myCamera.move(gps::MOVE_RIGHT, cameraMoveSpeed * deltaTimeSeconds);
+        }
+
+        if (pressedKeys[GLFW_KEY_Q]) {
+            angle -= 1.0f * deltaTimeSeconds;
+            // update model matrix
+            model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
+        }
+
+        if (pressedKeys[GLFW_KEY_E]) {
+            angle += 1.0f * deltaTimeSeconds;
+            // update model matrix
+            model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
+        }
+
+        if (pressedKeys[GLFW_KEY_Y]) {
+            myCamera.rotate(0, -cameraRotationSpeed * deltaTimeSeconds);
+        }
+        if (pressedKeys[GLFW_KEY_T]) {
+            myCamera.rotate(0, cameraRotationSpeed * deltaTimeSeconds);
+        }
+
+        if (pressedKeys[GLFW_KEY_P]) {
+            myCamera.rotate(cameraRotationSpeed * deltaTimeSeconds, 0);
+        }
+        if (pressedKeys[GLFW_KEY_L]) {
+            myCamera.rotate(-cameraRotationSpeed * deltaTimeSeconds, 0);
+        }
+        if (pressedKeys[GLFW_KEY_ENTER]) {
+            if (!prev_enter_pressed) {
+                stopped = !stopped;
+                prev_enter_pressed = true;
             }
-            else {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+        else {
+            prev_enter_pressed = false;
+        }
+        if (pressedKeys[GLFW_KEY_M]) {
+            if (!mouse_button_pressed) {
+                mouse_control_enabled = !mouse_control_enabled;
+                mouse_button_pressed = true;
             }
-            wireframe_button_pressed = true;
+        }
+        else {
+            mouse_button_pressed = false;
+        }
+        if (pressedKeys[GLFW_KEY_Z]) {
+            if (!wireframe_button_pressed) {
+                wireframe_mode_on = !wireframe_mode_on;
+                if (wireframe_mode_on) {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                }
+                else {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                }
+                wireframe_button_pressed = true;
+            }
+        }
+        else {
+            wireframe_button_pressed = false;
         }
     }
     else {
-        wireframe_button_pressed = false;
+        // planet surface mode
+        if (pressedKeys[GLFW_KEY_Y]) {
+            planetSurfaceCamera.rotate(0, -cameraRotationSpeed * deltaTimeSeconds);
+        }
+        if (pressedKeys[GLFW_KEY_T]) {
+            planetSurfaceCamera.rotate(0, cameraRotationSpeed * deltaTimeSeconds);
+        }
+
+        if (pressedKeys[GLFW_KEY_P]) {
+            planetSurfaceCamera.rotate(cameraRotationSpeed * deltaTimeSeconds, 0);
+        }
+        if (pressedKeys[GLFW_KEY_L]) {
+            planetSurfaceCamera.rotate(-cameraRotationSpeed * deltaTimeSeconds, 0);
+        }
+        if (pressedKeys[GLFW_KEY_UP]) {
+            surfaceSceneOn = false;
+        }
     }
 }
 
@@ -398,8 +442,13 @@ GLuint ReadTextureFromFile(const char* file_name) {
 }
 
 void initModels() {
+    // solar system scene
    solarSystem.init(&myShaderWithLocs, &sunShaderWithLocs, &earthShaderWithLocs);
    earth_night_texture = ReadTextureFromFile("models/earth/earth_night_texture.jpg");
+
+   // planet surface scene
+   planetSurfaceObj.LoadModel("models/planet_surface/planet_surface.obj");
+   roverObj.LoadModel("models/planet_rover/rover.obj");
 }
 
 void initShaders() {
@@ -409,6 +458,8 @@ void initShaders() {
     sunDepthMapShader.LoadShader("shaders/depthMapForSun.vert", "shaders/depthMapForSun.frag", "shaders/depthMapForSun.geo");
     sunShaderWithLocs.init("shaders/sunShader.vert", "shaders/sunShader.frag");
     earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
+    earthShaderWithLocs.init("shaders/earthShader.vert", "shaders/earthShader.frag");
+    planetSurfaceShaderWithLocs.init("shaders/planetSurfaceShader.vert", "shaders/planetSurfaceShader.frag");
 }
 
 void initSkyBox() {
@@ -422,6 +473,8 @@ void initSkyBox() {
 }
 
 void initUniforms() {
+    // --------- for the solar system scene
+
     model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 
     // get view matrix for current camera
@@ -454,57 +507,108 @@ void initUniforms() {
     glUniform1f(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
     glUseProgram(earthShaderWithLocs.getShader()->shaderProgram);
     glUniform1f(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "far_plane"), SUN_DEPTH_MAP_FAR_PLANE);
+
+    // --------- for the planet surface scene
+    planetSurfaceShaderWithLocs.sendDirectionalLightUniform(planetSurfaceDirLight);
+
+    planetSurfaceShaderWithLocs.sendViewUniform(planetSurfaceCamera.getViewMatrix());
+
+    planetSurfaceShaderWithLocs.sendModelUniform(planetSurfaceModel);
 }
 
 void updateView() {
-    //update view matrix
-    view = myCamera.getViewMatrix();
+    if (!surfaceSceneOn) {
+        //update view matrix
+        view = myCamera.getViewMatrix();
 
-    myShaderWithLocs.sendViewUniform(view);
-    sunShaderWithLocs.sendViewUniform(view);
-    earthShaderWithLocs.sendViewUniform(view);
+        myShaderWithLocs.sendViewUniform(view);
+        sunShaderWithLocs.sendViewUniform(view);
+        earthShaderWithLocs.sendViewUniform(view);
+    }
+    else {
+        view = planetSurfaceCamera.getViewMatrix();
+
+        planetSurfaceShaderWithLocs.sendViewUniform(view);
+    }
 }
 
 void renderScene() {
-    setupShadowTransforms();
+    if (!surfaceSceneOn) {
+        // render solar system scene
+        setupShadowTransforms();
 
-    updateView();
+        updateView();
 
-    // 1. first render to depth cubemap
-    glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    solarSystem.renderWithDepthMapShader(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, &sunDepthMapShader);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // 1. first render to depth cubemap
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        solarSystem.renderWithDepthMapShader(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, &sunDepthMapShader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    // 2. then render scene as normal with shadow mapping (using depth cubemap)
-    glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    myShaderWithLocs.getShader()->useShaderProgram();
-    glActiveTexture(GL_TEXTURE8);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-    glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
-    earthShaderWithLocs.getShader()->useShaderProgram();
-    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+        // 2. then render scene as normal with shadow mapping (using depth cubemap)
+        glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        myShaderWithLocs.getShader()->useShaderProgram();
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        glUniform1i(glGetUniformLocation(myShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
+        earthShaderWithLocs.getShader()->useShaderProgram();
+        glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "depthMap"), 8);
 
-    glActiveTexture(GL_TEXTURE5);
-    earthShaderWithLocs.getShader()->useShaderProgram();
-    glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
-    glBindTexture(GL_TEXTURE_2D, earth_night_texture);
+        glActiveTexture(GL_TEXTURE5);
+        earthShaderWithLocs.getShader()->useShaderProgram();
+        glUniform1i(glGetUniformLocation(earthShaderWithLocs.getShader()->shaderProgram, "nightDiffuseTexture"), 5);
+        glBindTexture(GL_TEXTURE_2D, earth_night_texture);
 
-    solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
+        solarSystem.render(&model, &view, simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS);
 
-    glActiveTexture(GL_TEXTURE5);
-    glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
-    mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
-    glActiveTexture(GL_TEXTURE8);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+        mySkyBox.Draw(*skyboxShaderWithLocs.getShader(), view, projection);
+        glActiveTexture(GL_TEXTURE8);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+    else {
+        // render planet surface scene
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        updateView();
+
+        planetSurfaceShaderWithLocs.getShader()->useShaderProgram();
+
+        glm::mat3 normalMatrix = glm::mat3(glm::inverseTranspose(view * planetSurfaceModel));
+
+        planetSurfaceShaderWithLocs.sendNormalMatrixUniform(normalMatrix);
+
+        planetSurfaceObj.Draw(*planetSurfaceShaderWithLocs.getShader());
+
+        roverObj.Draw(*planetSurfaceShaderWithLocs.getShader());
+    }
 }
 
 void cleanup() {
     myWindow.Delete();
     //cleanup code for your own data
+}
+
+void detectLandings() {
+    if (!surfaceSceneOn) {
+        glm::vec3 cameraPos = myCamera.getCameraPosition();
+
+        bool landed = solarSystem.hasLandedOnPlanet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
+
+        if (landed) {
+            surfaceSceneOn = true;
+            landingDetectionOn = false;
+        }
+        else {
+            if (!landingDetectionOn) {
+                landingDetectionOn = true;
+            }
+        }
+    }
 }
 
 int main(int argc, const char * argv[]) {
@@ -535,6 +639,8 @@ int main(int argc, const char * argv[]) {
 		glfwSwapBuffers(myWindow.getWindow());
 
 		glCheckError();
+
+        detectLandings();
 	}
 
 	cleanup();
