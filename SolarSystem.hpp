@@ -31,7 +31,7 @@ namespace view_layer {
 			long long current_seconds,
 			gps::GeometryShader* geometryShader);
 
-		bool landed_on_planet(long long current_seconds, glm::vec3 current_pos);
+		bool hasLandedOnPlanet(long long current_seconds, glm::vec3 current_pos);
 
 	private:
 		std::vector<SpaceObjectView> space_objects_;

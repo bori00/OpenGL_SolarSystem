@@ -39,7 +39,6 @@ namespace view_layer {
 		glm::vec3 uranusPosition(2872500 / DISTANCES_DIVIDER, 0, 0);
 		glm::vec3 neptunePosition(4495100 / DISTANCES_DIVIDER, 0, 0);
 
-		// TODO: resolve memory leak
 		model_layer::Planet* mercury_planet = new model_layer::Planet(mercuryPosition, 1408 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 88 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 2.44);
 		model_layer::Planet* venus_planet = new model_layer::Planet(venusPosition, 5832 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 224.7 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 6.052);
 		model_layer::Planet* earth_planet = new model_layer::Planet(earthPosition, 24 * NO_SECONDS_IN_HOUR, glm::vec3(0, 1, 0), 365.2 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 6.371);
@@ -73,7 +72,7 @@ namespace view_layer {
 		model_layer::Moon* earth_moon = new model_layer::Moon(earthMoonPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 27.322 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), earth_planet, 1.737);
 		view_layer::SpaceObjectView earth_moon_view(earth_moon, "models/earth_moon/earth_moon.obj", generic_shader_with_locs_);
 		space_objects_.push_back(earth_moon_view);
-		// 4 moons for Jupiter (at randomized positions, speed, etc.)
+		// multiple moons for Jupiter (at randomized positions, speed, etc.)
 		gps::Model3D* jupiter_io_moon_model = new gps::Model3D();
 		jupiter_io_moon_model->LoadModel("models/jupiter_io_moon/jupiter_io_moon.obj");
 		for (int i = 0; i < NO_JUPITER_MOONS; i++) {
@@ -87,7 +86,7 @@ namespace view_layer {
 
 	void SolarSystem::initSun() {
 		glm::vec3 sunPosition(0, 0, 0);
-		// TODO: solve memory leak
+
 		model_layer::Sun* sun = new model_layer::Sun(sunPosition, 27 * NO_SECONDS_IN_DAY, glm::vec3(0, 1, 0), 174.085);
 
 		view_layer::SpaceObjectView* sun_view = new SpaceObjectView(sun, "models/sun/sun.obj", sun_shader_with_locs_);
@@ -95,7 +94,7 @@ namespace view_layer {
 		sun_view_ = sun_view;
 	}
 
-	bool SolarSystem::landed_on_planet(long long current_seconds, glm::vec3 current_pos) {
+	bool SolarSystem::hasLandedOnPlanet(long long current_seconds, glm::vec3 current_pos) {
 		int i = 0;
 		for (auto& planet : space_objects_) {
 			if (length(planet.getCurrentPosition(current_seconds) - current_pos) < planet.getRadius()) {

@@ -35,7 +35,7 @@ gps::Camera myCamera(
     glm::vec3(0.0f, 1.0f, 0.0f));
 
 GLfloat cameraMoveSpeed = 300.0f;
-GLfloat cameraRotationSpeed = 10.0f;
+GLfloat cameraRotationSpeed = 20.0f;
 
 // event handling
 GLboolean pressedKeys[1024];
@@ -120,7 +120,7 @@ view_layer::DirLight planetSurfaceDirLight = {/*direction*/ glm::vec3(-1.0f, 1.0
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f),
                                 /*.ambientStrength =*/ 0.6,
                                 /*.diffuseStrength =*/ 0.8,
-                                /*.specularStrength =*/ 0.0 };
+                                /*.specularStrength =*/ 1.0 };
 gps::Model3D planetSurfaceObj;
 gps::Model3D roverObj;
 glm::mat4 planetSurfaceModel(1.0);
@@ -597,7 +597,7 @@ void detectLandings() {
     if (!surfaceSceneOn) {
         glm::vec3 cameraPos = myCamera.getCameraPosition();
 
-        bool landed = solarSystem.landed_on_planet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
+        bool landed = solarSystem.hasLandedOnPlanet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
 
         if (landed) {
             surfaceSceneOn = true;
