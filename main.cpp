@@ -65,7 +65,7 @@ std::vector<const GLchar*> skybox_faces;
 gps::SkyBox mySkyBox;
 
 // lighting
-// white directional light
+// white directional light, for the Sun only
 view_layer::DirLight dirLight = {/*direction*/ glm::vec3(-1.0f, -1.0f, 0.0f), 
                                 /*.color= */ glm::vec3(1.0f, 1.0f, 1.0f), 
                                 /*.ambientStrength =*/ 0.4, 
@@ -600,8 +600,10 @@ void detectLandings() {
         bool landed = solarSystem.hasLandedOnPlanet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
 
         if (landed) {
-            surfaceSceneOn = true;
-            landingDetectionOn = false;
+            if (landingDetectionOn) {
+                surfaceSceneOn = true;
+                landingDetectionOn = false;
+            }
         }
         else {
             if (!landingDetectionOn) {
