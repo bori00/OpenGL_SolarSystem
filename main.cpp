@@ -510,7 +510,7 @@ void cleanup() {
 void detectLandings() {
     glm::vec3 cameraPos = myCamera.getCameraPosition();
 
-    bool landed = solarSystem.landed_on_planet(currentTimeStamp, cameraPos);
+    bool landed = solarSystem.landed_on_planet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
 
     if (landed) {
         printf("Landed on a planet!");
