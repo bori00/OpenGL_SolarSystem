@@ -1,2 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram /> 
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="view_layer::TimedDrawable">
+    <Position X="5.5" Y="16.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAQAAA=</HashCode>
+      <FileName>TimedDrawable.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="model_layer::TimedSpaceObject">
+    <Position X="6.5" Y="9.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAABAA=</HashCode>
+      <FileName>TimedSpaceObject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="model_layer::Moon">
+    <Position X="3" Y="12" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AABACAAAAIEAAAACAQQAACAAAAAAAAAACAgAAEAABEA=</HashCode>
+      <FileName>Moon.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="model_layer::Planet">
+    <Position X="6.25" Y="12" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AABACAAAAIAAAAACAQQAACAAAAAAAAAACAoAAAAABEA=</HashCode>
+      <FileName>Planet.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="model_layer::Sun">
+    <Position X="9.75" Y="12" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AABACAAAAIAAAAACAAAAAAAAAAAAAAAACAgAAAAABEQ=</HashCode>
+      <FileName>Sun.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="view_layer::SpaceObjectView">
+    <Position X="7" Y="18.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAEAAAAAAAEAAAAAAAAAAAAAAACABgAAAQgAA=</HashCode>
+      <FileName>SpaceObjectView.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="view_layer::SolarSystem">
+    <Position X="3" Y="18.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AUAAIAAgQAAAAAQAAAAMAAAAAAAAAIKgAABAAABQAAA=</HashCode>
+      <FileName>SolarSystem.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
