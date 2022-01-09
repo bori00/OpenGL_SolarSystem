@@ -389,7 +389,7 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
-    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 GLuint ReadTextureFromFile(const char* file_name) {
@@ -599,7 +599,6 @@ void renderScene() {
 
 void cleanup() {
     myWindow.Delete();
-    //cleanup code for your own data
 }
 
 void detectLandings() {
