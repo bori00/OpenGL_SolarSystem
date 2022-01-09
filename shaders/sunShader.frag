@@ -12,5 +12,5 @@ void main()
 
     vec3 result = vec3(texture(diffuseTexture, fTexCoords));
 
-    fColor = vec4(result, 1.0f);
+    fColor = vec4(min(result, 1.0), 1.0f);
 }

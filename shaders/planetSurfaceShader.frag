@@ -56,5 +56,5 @@ void main()
     // phase 1: Directional lighting
     vec3 result = CalcDirLight(dirLight, normalEye, viewDir);
 
-    fColor = vec4(result, 1.0f);
+    fColor = vec4(min(result, 1.0), 1.0f);
 }

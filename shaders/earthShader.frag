@@ -85,14 +85,6 @@ void computePointShadow() {
         }
     }
     shadow /= float(samples);
-
-    /*float closestDepth = texture(depthMap, fragToLight).r * far_plane;
-
-    if (closestDepth < currentDepth - bias) {
-        shadow = 1.0;
-    } else {
-        shadow = 0.0;
-    }*/
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
@@ -170,5 +162,5 @@ void main()
     computePointShadow();
     result += CalcPointLight(sunLight, normalEye, fPosEye.xyz, viewDir); 
 
-    fColor = vec4(result, 1.0f);
+    fColor = vec4(min(result, 1.0), 1.0f);
 }
