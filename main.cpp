@@ -534,6 +534,7 @@ void updateView() {
 
 void renderScene() {
     if (!surfaceSceneOn) {
+        // render solar system scene
         setupShadowTransforms();
 
         updateView();
@@ -570,6 +571,7 @@ void renderScene() {
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
     else {
+        // render planet surface scene
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         updateView();
@@ -598,14 +600,12 @@ void detectLandings() {
         bool landed = solarSystem.landed_on_planet(simulationTimeStamp * REAL_SECOND_TO_ANIMATION_SECONDS, cameraPos);
 
         if (landed) {
-            printf("Landed on a planet!");
             surfaceSceneOn = true;
             landingDetectionOn = false;
         }
         else {
             if (!landingDetectionOn) {
                 landingDetectionOn = true;
-                printf("Turn landing detection on!");
             }
         }
     }
