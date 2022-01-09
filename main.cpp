@@ -261,6 +261,14 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
             myCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
         }
     }
+    else {
+        if (mouse_control_enabled) {
+            xoffset *= mouseSensitivity;
+            yoffset *= mouseSensitivity;
+
+            planetSurfaceCamera.rotate(cameraRotationSpeed * yoffset * deltaTimeSeconds, cameraRotationSpeed * xoffset * deltaTimeSeconds);
+        }
+    }
 }
 
 void processMovement() {
@@ -315,30 +323,6 @@ void processMovement() {
         else {
             prev_enter_pressed = false;
         }
-        if (pressedKeys[GLFW_KEY_M]) {
-            if (!mouse_button_pressed) {
-                mouse_control_enabled = !mouse_control_enabled;
-                mouse_button_pressed = true;
-            }
-        }
-        else {
-            mouse_button_pressed = false;
-        }
-        if (pressedKeys[GLFW_KEY_Z]) {
-            if (!wireframe_button_pressed) {
-                wireframe_mode_on = !wireframe_mode_on;
-                if (wireframe_mode_on) {
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                }
-                else {
-                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                }
-                wireframe_button_pressed = true;
-            }
-        }
-        else {
-            wireframe_button_pressed = false;
-        }
     }
     else {
         // planet surface mode
@@ -358,6 +342,31 @@ void processMovement() {
         if (pressedKeys[GLFW_KEY_UP]) {
             surfaceSceneOn = false;
         }
+    }
+    // for both scenes
+    if (pressedKeys[GLFW_KEY_M]) {
+        if (!mouse_button_pressed) {
+            mouse_control_enabled = !mouse_control_enabled;
+            mouse_button_pressed = true;
+        }
+    }
+    else {
+        mouse_button_pressed = false;
+    }
+    if (pressedKeys[GLFW_KEY_Z]) {
+        if (!wireframe_button_pressed) {
+            wireframe_mode_on = !wireframe_mode_on;
+            if (wireframe_mode_on) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
+            wireframe_button_pressed = true;
+        }
+    }
+    else {
+        wireframe_button_pressed = false;
     }
 }
 
@@ -380,7 +389,7 @@ void initOpenGLState() {
 	glEnable(GL_CULL_FACE); // cull face
 	glCullFace(GL_BACK); // cull back face
 	glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
-    // TODO: glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 GLuint ReadTextureFromFile(const char* file_name) {
