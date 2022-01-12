@@ -2,7 +2,7 @@
 
 Project prepared for the Graphcis Processing course (3rd year, 1st semester).
 
-Please refer to the [https://github.com/bori00/OpenGL_SolarSystem/blob/main/Documentation.pdf](Documentation) for more details about the scene and the implemenation.
+Please refer to the [Documentation](https://github.com/bori00/OpenGL_SolarSystem/blob/main/Documentation.pdf) for more details about the scene and the implemenation.
 
 ![earth_moon_sun_night](https://user-images.githubusercontent.com/25320744/149171780-6733fd42-b014-41ef-950b-46fcd4ad4e56.png)
 ![jupiter_lighting](https://user-images.githubusercontent.com/25320744/149171809-3740e56f-48ae-478f-aec2-27853b08ffb9.png)
